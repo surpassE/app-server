@@ -1,5 +1,8 @@
 package com.dobe.appserver.service.impl;
 
+import com.dd.plist.NSDictionary;
+import com.dd.plist.NSString;
+import com.dd.plist.PropertyListParser;
 import com.dobe.appserver.constants.Constants;
 import com.dobe.appserver.model.AppInfo;
 import com.dobe.appserver.service.ManageService;
@@ -15,8 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * TODO
@@ -122,25 +127,74 @@ public class ManageServiceImpl implements ManageService {
         return path.toFile().getAbsolutePath();
     }
 
-    public static void main(String[] args) throws Exception{
-        String filePath = "D:\\test\\app\\android\\CXJ_ANDROID_1.0.0.apk";
-        ApkFile apkFile = new ApkFile(new File(filePath));
-        ApkMeta apkMeta = apkFile.getApkMeta();
-//        System.out.println(apkMeta.getLabel());
-//        System.out.println(apkMeta.getPackageName());
-//        System.out.println(apkMeta.getVersionCode());
-//        System.out.println(apkMeta.getVersionName());
-//       
-//        logger.info(apkMeta.getPlatformBuildVersionCode());
-//        
-//        logger.info(apkMeta.getPlatformBuildVersionName());
-        logger.info(apkMeta.toString());
-        logger.info("{}", apkMeta.getName());
-        logger.info("{}", apkMeta.getPlatformBuildVersionCode());
-        
-       
-   
+    /**
+     *  读取配置文件中的key dict string
+     *  @param nsDictionary  key或是dict节点
+     *  @param list  key的集合 Arrays.asList("com.apple.iTunesStore.downloadInfo#", "accountInfo#", "AppleID") 
+     *               表示读取com.apple.iTunesStore.downloadInfo下accountInfo下AppleID对应的String值
+     *  @return java.lang.String
+     *  @date                    ：2018/10/12
+     *  @author                  ：zc.ding@foxmail.com
+     */
+    private static String getInfo(NSDictionary nsDictionary, List<String> list){
+        List<String> tmp = new ArrayList<>(list);
+        if(tmp.size() > 0){
+            String key = tmp.get(0);
+            if(key.contains("#")){
+                tmp.remove(0);
+                return getInfo((NSDictionary)nsDictionary.get(key.replaceAll("#", "")), tmp);
+            }else{
+                return nsDictionary.get(key).toString();
+            }
+        }
+        return null;
     }
+
+    public static void main(String[] args) throws Exception{
+//        String filePath = "D:\\soft\\test\\app\\android\\CXJ_ANDROID_1.0.0.apk";
+        String filePath = "C:\\soft\\test\\gudiacidian.ipa";
+        String destFilePath = "C:\\soft\\test\\info.plist";
+//        ApkFile apkFile = new ApkFile(new File(filePath));
+//        ApkMeta apkMeta = apkFile.getApkMeta();
+//        logger.info(apkMeta.toString());
+//        logger.info("{}", apkMeta.getName());
+//        logger.info("{}", apkMeta.getPlatformBuildVersionCode());
+
+        File file = new File(filePath);
+
+//        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath));
+//        ZipEntry zipEntry;
+//        while((zipEntry = zipInputStream.getNextEntry()) != null){
+//            if(!zipEntry.isDirectory() && zipEntry.getName().endsWith(".plist")){
+////                zipEntry.
+//            }
+//        }
+
+        ZipFile zipFile = new ZipFile(filePath);
+        Enumeration<?> entryEnumeration = zipFile.entries();
+        while(entryEnumeration.hasMoreElements()){
+            ZipEntry zipEntry = (ZipEntry)entryEnumeration.nextElement();
+            if(!zipEntry.isDirectory() && zipEntry.getName().endsWith(".plist") && !zipEntry.getName().contains("/")){
+                try(InputStream inputStream = zipFile.getInputStream(zipEntry);
+                    OutputStream os = new FileOutputStream(destFilePath)){
+                    byte[] buf = new byte[2048];
+                    int length;
+                    while((length = inputStream.read(buf)) > 0){
+                        os.write(buf, 0, length);
+                    }
+                }
+            }
+        }
+        
+        NSDictionary rootDict = (NSDictionary)PropertyListParser.parse(destFilePath);
+//        NSString parameters = (NSString) rootDict.objectForKey("CFBundleIdentifier");
+        NSString parameters = (NSString) rootDict.get("bundleVersion");
+        NSDictionary nsDictionary = (NSDictionary)rootDict.get("com.apple.iTunesStore.downloadInfo");
+        logger.info("{}", getInfo(rootDict, Arrays.asList("com.apple.iTunesStore.downloadInfo#", "accountInfo#", "AppleID")));
+        
+    }
+    
+    
     
     
 }

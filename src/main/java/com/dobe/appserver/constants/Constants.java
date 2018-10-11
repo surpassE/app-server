@@ -30,9 +30,9 @@ public class Constants {
     */
     public final static String APP_ICON = "default.icon";
     /**
-    * 
+    * D:/test/app
     */
-    public final static String APP_PATH = "D:/test/app";
+    public final static String APP_PATH = "C:/soft/test/app";
     /**
     * android app存储路径
     */
