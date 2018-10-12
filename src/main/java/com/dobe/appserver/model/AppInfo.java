@@ -25,7 +25,7 @@ public class AppInfo implements Serializable {
     /**
     * 构建版本号
     */
-    private Long versionCode;
+    private String versionCode;
     /**
     * 图标文件
     */
@@ -73,11 +73,11 @@ public class AppInfo implements Serializable {
         this.versionName = versionName;
     }
 
-    public Long getVersionCode() {
+    public String getVersionCode() {
         return versionCode;
     }
 
-    public void setVersionCode(Long versionCode) {
+    public void setVersionCode(String versionCode) {
         this.versionCode = versionCode;
     }
 
@@ -143,5 +143,23 @@ public class AppInfo implements Serializable {
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
+    }
+
+    @Override
+    public String toString() {
+        return "AppInfo{" +
+                "code='" + code + '\'' +
+                ", label='" + label + '\'' +
+                ", versionName='" + versionName + '\'' +
+                ", versionCode='" + versionCode + '\'' +
+                ", icon='" + icon + '\'' +
+                ", appType=" + appType +
+                ", sysType=" + sysType +
+                ", envType=" + envType +
+                ", fileName='" + fileName + '\'' +
+                ", fileSize=" + fileSize +
+                ", suffix='" + suffix + '\'' +
+                ", packageName='" + packageName + '\'' +
+                '}';
     }
 }

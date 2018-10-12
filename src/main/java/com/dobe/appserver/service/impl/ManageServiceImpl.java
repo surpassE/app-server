@@ -1,9 +1,8 @@
 package com.dobe.appserver.service.impl;
 
-import com.dd.plist.NSDictionary;
-import com.dd.plist.NSString;
-import com.dd.plist.PropertyListParser;
+import com.dd.plist.*;
 import com.dobe.appserver.constants.Constants;
+import com.dobe.appserver.dao.RepositoryService;
 import com.dobe.appserver.model.AppInfo;
 import com.dobe.appserver.service.ManageService;
 import com.dobe.appserver.utils.SpecialCodeGenerateUtils;
@@ -13,18 +12,22 @@ import net.dongliu.apk.parser.bean.ApkMeta;
 import net.dongliu.apk.parser.bean.IconFace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.transform.Source;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
- * TODO
+ * 分析app package
  *
  * @author zc.ding
  * @create 2018/10/11
@@ -33,6 +36,10 @@ import java.util.zip.ZipInputStream;
 public class ManageServiceImpl implements ManageService {
     
     private static final Logger logger = LoggerFactory.getLogger(ManageServiceImpl.class);
+    
+    @Autowired
+    @Qualifier("inIRepositoryServiceImpl")
+    private RepositoryService repositoryService;
     
     @Override
     public String upload(MultipartFile file) {
@@ -59,8 +66,13 @@ public class ManageServiceImpl implements ManageService {
             logger.error("save upload file error. fileName: {}", appInfo.getFileName(), e);
             return Constants.ERROR;
         }
+        //解析app安装包
         this.parseApp(appInfo, filePath);
-        return Constants.SUCCESS;
+        //持久化安装包
+        if(this.repositoryService.saveAppInfo(appInfo) > 0){
+            return Constants.SUCCESS;
+        }
+        return Constants.ERROR;
     }
     
     /**
@@ -86,8 +98,8 @@ public class ManageServiceImpl implements ManageService {
     
     /**
     *  解析android安装包
-    *  @param appInfo
-    *  @param filePath
+    *  @param appInfo   应用信息
+    *  @param filePath  文件包路径
     *  @return com.dobe.appserver.model.AppInfo
     *  @date                    ：2018/10/11
     *  @author                  ：zc.ding@foxmail.com
@@ -96,23 +108,105 @@ public class ManageServiceImpl implements ManageService {
         ApkFile apkFile = new ApkFile(new File(filePath));
         ApkMeta apkMeta = apkFile.getApkMeta();
         appInfo.setLabel(apkMeta.getLabel());
-        appInfo.setVersionCode(apkMeta.getVersionCode());
+        appInfo.setVersionCode(apkMeta.getVersionCode().toString());
         appInfo.setVersionName(apkMeta.getVersionName()); 
         appInfo.setPackageName(apkMeta.getPackageName());
         apkFile.getAllIcons().parallelStream().min(Comparator.comparingInt(o -> o.getData().length)).ifPresent(iconFace -> {
             appInfo.setIcon(Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + "_" + Paths.get(iconFace.getPath()).getFileName().toString());
             this.saveIcon(Paths.get(appInfo.getIcon()), iconFace.getData());
         });
+        logger.info("{}", appInfo);
         return appInfo;
     }
     
-    private AppInfo parseIpa(AppInfo appInfo, String filePath){
-        
+    /**
+    *  解析IOS安装包
+    *  @param appInfo   应用信息
+    *  @param filePath  文件包路径
+    *  @return com.dobe.appserver.model.AppInfo
+    *  @date                    ：2018/10/12
+    *  @author                  ：zc.ding@foxmail.com
+    */
+    private AppInfo parseIpa(AppInfo appInfo, String filePath) throws Exception{
+        List<Object> list = getIpaInputStream(filePath, ".app/Info.plist");
+        if(list != null){
+            NSDictionary rootDict = (NSDictionary) PropertyListParser.parse((InputStream)(list.get(0)));
+            appInfo.setLabel(getInfo(rootDict, Collections.singletonList("CFBundleDisplayName")).toString());
+            appInfo.setVersionCode(getInfo(rootDict, Collections.singletonList("CFBundleVersion")).toString());
+            appInfo.setVersionName(getInfo(rootDict, Collections.singletonList("CFBundleShortVersionString")).toString());
+            appInfo.setPackageName(getInfo(rootDict, Collections.singletonList("CFBundleIdentifier")).toString());
+            Object obj = getInfo(rootDict, Arrays.asList("CFBundleIcons#", "CFBundlePrimaryIcon#", "CFBundleIconFiles"));
+            String iconNameReg = null;
+            if(obj instanceof NSArray){
+                NSArray nsArray = (NSArray)obj;
+                if(nsArray.count() > 0){
+                    iconNameReg = nsArray.objectAtIndex(0).toJavaObject().toString();
+                    if(!iconNameReg.endsWith(".png")){
+                        iconNameReg = ".+" + iconNameReg + "@\\dx\\.png";
+                    }
+                }
+            }
+            Optional.ofNullable(iconNameReg).ifPresent(o -> {
+                List<Object> iconList = getIpaInputStream(filePath, o);
+                if(iconList != null){
+                    appInfo.setIcon(Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + "_" + iconList.get(1));
+                    this.saveIcon(Paths.get(appInfo.getIcon()), (InputStream)(iconList.get(0)));
+                }
+            });
+        }
+        logger.info("{}", appInfo);
         return appInfo;
     }
+    
+    /**
+    *  获得压缩文件中指定文件的文件流
+    *  @param filePath  压缩文件路径
+    *  @param fileName  文件名称
+    *  @return java.io.InputStream
+    *  @date                    ：2018/10/12
+    *  @author                  ：zc.ding@foxmail.com
+    */
+    private List<Object> getIpaInputStream(String filePath, String fileName){
+        try (ZipInputStream zipIs = new ZipInputStream(new FileInputStream(filePath))){
+            ZipEntry ze;
+            while ((ze = zipIs.getNextEntry()) != null) {
+                if (!ze.isDirectory()) {
+                    String name = ze.getName();
+                    // 读取 info.plist 文件,包里可能会有多个 info.plist 文件！！！
+                    if (name.contains(fileName) || name.matches(fileName)) {
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        int chunk;
+                        byte[] data = new byte[2048];
+                        while(-1 != (chunk = zipIs.read(data))) {
+                            byteArrayOutputStream.write(data, 0, chunk);
+                        }
+                        return Arrays.asList(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), Paths.get(name).getFileName().toString());
+                    }
+                }
+            }
+        }catch (Exception e){
+            logger.error("parse ipa fail.", e);
+        }
+        return null;
+    }
 
-    private String saveIcon(Path path, byte[] buf){
+    /**
+    *  保存icon图片
+    *  @param path 文件地址
+    *  @param data   icon流或字节数组
+    *  @date                    ：2018/10/12
+    *  @author                  ：zc.ding@foxmail.com
+    */
+    private void saveIcon(Path path, Object data){
         try {
+            byte[] buf;
+            if(data instanceof InputStream){
+                InputStream inputStream = (InputStream)data;
+                buf = new byte[inputStream.available()];
+                inputStream.read(buf);
+            }else{
+                buf = (byte[])data;
+            }
             Files.createDirectories(path.getParent());
             File file = path.toFile();
             if(file.exists()){
@@ -122,10 +216,8 @@ public class ManageServiceImpl implements ManageService {
             Files.write(path, buf);
         }catch (Exception e){
             logger.error("save app icon error.", e);
-            return Constants.ERROR;
         }
-        return path.toFile().getAbsolutePath();
-    }
+    } 
 
     /**
      *  读取配置文件中的key dict string
@@ -136,7 +228,7 @@ public class ManageServiceImpl implements ManageService {
      *  @date                    ：2018/10/12
      *  @author                  ：zc.ding@foxmail.com
      */
-    private static String getInfo(NSDictionary nsDictionary, List<String> list){
+    private static Object getInfo(NSDictionary nsDictionary, List<String> list){
         List<String> tmp = new ArrayList<>(list);
         if(tmp.size() > 0){
             String key = tmp.get(0);
@@ -144,54 +236,20 @@ public class ManageServiceImpl implements ManageService {
                 tmp.remove(0);
                 return getInfo((NSDictionary)nsDictionary.get(key.replaceAll("#", "")), tmp);
             }else{
-                return nsDictionary.get(key).toString();
+                return nsDictionary.get(key);
             }
         }
-        return null;
+        return "";
     }
 
     public static void main(String[] args) throws Exception{
-//        String filePath = "D:\\soft\\test\\app\\android\\CXJ_ANDROID_1.0.0.apk";
-        String filePath = "C:\\soft\\test\\gudiacidian.ipa";
-        String destFilePath = "C:\\soft\\test\\info.plist";
-//        ApkFile apkFile = new ApkFile(new File(filePath));
-//        ApkMeta apkMeta = apkFile.getApkMeta();
-//        logger.info(apkMeta.toString());
-//        logger.info("{}", apkMeta.getName());
-//        logger.info("{}", apkMeta.getPlatformBuildVersionCode());
-
-        File file = new File(filePath);
-
-//        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath));
-//        ZipEntry zipEntry;
-//        while((zipEntry = zipInputStream.getNextEntry()) != null){
-//            if(!zipEntry.isDirectory() && zipEntry.getName().endsWith(".plist")){
-////                zipEntry.
-//            }
-//        }
-
-        ZipFile zipFile = new ZipFile(filePath);
-        Enumeration<?> entryEnumeration = zipFile.entries();
-        while(entryEnumeration.hasMoreElements()){
-            ZipEntry zipEntry = (ZipEntry)entryEnumeration.nextElement();
-            if(!zipEntry.isDirectory() && zipEntry.getName().endsWith(".plist") && !zipEntry.getName().contains("/")){
-                try(InputStream inputStream = zipFile.getInputStream(zipEntry);
-                    OutputStream os = new FileOutputStream(destFilePath)){
-                    byte[] buf = new byte[2048];
-                    int length;
-                    while((length = inputStream.read(buf)) > 0){
-                        os.write(buf, 0, length);
-                    }
-                }
-            }
-        }
-        
-        NSDictionary rootDict = (NSDictionary)PropertyListParser.parse(destFilePath);
-//        NSString parameters = (NSString) rootDict.objectForKey("CFBundleIdentifier");
-        NSString parameters = (NSString) rootDict.get("bundleVersion");
-        NSDictionary nsDictionary = (NSDictionary)rootDict.get("com.apple.iTunesStore.downloadInfo");
-        logger.info("{}", getInfo(rootDict, Arrays.asList("com.apple.iTunesStore.downloadInfo#", "accountInfo#", "AppleID")));
-        
+        ManageServiceImpl m = new ManageServiceImpl();
+//        String filePath = "C:\\soft\\test\\gudiacidian.ipa";
+        String filePath = "D:\\test\\app\\android\\CXJ_ANDROID_1.0.0.apk";
+        m.parseApk(new AppInfo(), filePath);
+//        String filePath = "C:\\soft\\test\\gudiacidian.ipa";
+//        String filePath = "D:\\test\\app\\ios\\qiankundai.ipa";
+//        m.parseIpa(new AppInfo(), filePath);
     }
     
     
