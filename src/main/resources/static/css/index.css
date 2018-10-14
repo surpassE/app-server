@@ -1,0 +1,172 @@
+body {
+    margin: 0;
+}
+
+.app-server-div {
+    background-color: #faebd7;
+    width: auto;
+    height: 42px;
+    padding: 10px 35px;
+    font-size: 30px;
+    font-weight: bolder;
+}
+
+.home-div {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.upload-div {
+    border: 2px dashed #e9e9e9;
+    height: 45px;
+    width: auto;
+    font-size: 15px;
+    text-align: center;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.upload-fileinput-button {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.upload-fileinput-button input{
+    position:absolute;
+    right: 0px;
+    top: 0px;
+    opacity: 0;
+    -ms-filter: 'alpha(opacity=0)';
+    font-size: 200px;
+}
+
+/*查询样式*/
+.search-type {
+    text-align: center;
+    font-size: 18px;
+    float: left;
+    width: 85px;
+    height: 40px;
+    border-width: 2px 0 2px 2px;
+    border-style: solid;
+    border-radius: 4px 0 0 4px;
+    border-color: #e9e9e9;
+}
+
+/*search div*/
+.search-div {
+    margin-top: 20px;
+    background: #0e77ca;
+}
+
+.search-base-div {
+    text-align: center;
+    font-size: 18px;
+    float: left;
+    width: 55px;
+    height: 30px;
+    border-style: solid;
+    border-color: lightgray;
+}
+
+.search-left-div {
+    border-width: 2px 2px 2px 2px;
+    border-radius: 4px 0 0 4px;
+}
+
+.search-next-left-div {
+    border-width: 2px 2px 2px 0;
+}
+
+.search-right-div {
+    border-width: 2px 2px 2px 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.search-font-base-div {
+    margin: 5px 10px;
+    width: 35px;
+    font-size: 15px;
+    color: gray;
+}
+
+.search-select-font-div {
+    color: #108ee9;
+}
+
+.search-select-div {
+    /*background-color: lightgreen;*/
+    /*border-color: lightgreen;*/
+    border-width: 2px;
+    border-color: #108ee9;
+}
+
+/*数据区样式*/
+.data-div {
+    width: -webkit-fill-available;
+    padding: 10px 40px 20px 25px;
+    border: 2px solid #e9e9e9;
+    border-radius: 4px;
+}
+
+.data-info-div {
+    height: 160px;
+    padding: 10px 10px 10px 10px;
+}
+
+.data-img-div{
+    float: left;
+    margin: 10px 10px 10px 10px;
+}
+
+.data-detail-div{
+    float: left;
+    margin-left: 10px;
+}
+
+.data-del-div{
+    float: left;
+    margin: 134px 0 0 55%;
+}
+
+.data-label-span{
+    font-size: 25px;
+    float: left;
+    margin: 6px 0 0 1px;
+}
+
+.data-detail-label-span{
+    font-size: 15px;
+}
+
+.data-detail-span{
+    color: gray;
+    font-size: 14px;
+}
+
+.data-more-div {
+    width: -webkit-fill-available;
+    padding: 9px 0 5px 0;
+    border-radius: 4px 0 0 4px;
+    border-width: 2px 2px 2px 2px;
+    text-align: center;
+    font-size: 18px;
+    float: left;
+    height: 30px;
+    border-style: solid;
+    border-color: lightgray;
+    color:gray;
+}
+
+.data-more-div:before{
+    content: "\271A";
+}
+
+
+
+
+
+
+
+

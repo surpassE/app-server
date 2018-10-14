@@ -1,5 +1,7 @@
 package com.dobe.appserver.model;
 
+import com.sirding.annotation.Option;
+
 import java.io.Serializable;
 
 /**
@@ -13,40 +15,56 @@ public class AppInfo implements Serializable {
     /**
     * 唯一标识
     */
+    @Option(isSection = true)
     private String code;
     /**
     * app名称
     */
+    @Option
     private String label;
     /**
     * 版本号
     */
+    @Option
     private String versionName;
     /**
     * 构建版本号
     */
+    @Option
     private String versionCode;
     /**
     * 图标文件
     */
+    @Option
     private String icon;
     /**
      * 1-ios 2-android
      */
+    @Option
     private Integer appType;
     /**
      * 1-qkd 2-hkjf 3-cxj 4-qsh
      */
+    @Option
     private Integer sysType;
     /**
      * 1-dev(snapshoot) 2-beta 3-stable(released)
      */
+    @Option
     private Integer envType;
-    
+    @Option
     private String fileName;
+    @Option
     private Long fileSize;
+    @Option
     private String suffix;
+    @Option
     private String packageName;
+    @Option
+    private String time;
+    
+    private Integer start = 0;
+    private Integer rows = 5;
     
 
     public String getCode() {
@@ -143,6 +161,30 @@ public class AppInfo implements Serializable {
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public Integer getStart() {
+        return start;
+    }
+
+    public void setStart(Integer start) {
+        this.start = start;
+    }
+
+    public Integer getRows() {
+        return rows;
+    }
+
+    public void setRows(Integer rows) {
+        this.rows = rows;
     }
 
     @Override

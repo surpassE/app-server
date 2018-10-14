@@ -2,26 +2,236 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>App版本管理</title>
+
+    <link rel="stylesheet" href="css/index.css">
     <script src="jslib/jquery-3.3.1.min.js"></script>
+
 </head>
 <body>
-    <form id="uploadForm" method="post" action=""  enctype="multipart/form-data">	
-        文件：<input type="file"  name="file" /><br/>
-        <a href="javascript:void(0)" onclick="upload()">开始</a>
-        <br/>
-    </form>
-</body>
 
+<div id="nav" style="width: 100px; background-color: red">
+    <div>hello</div>
+</div>
+<div>
+    <!-- 头部描述 -->
+    <div class="app-server-div">AppServer</div>
+    <div style="padding: 10px 35px;">
+        <div class="home-div">Home</div>
+        
+        <!-- 文件拖拽 -->
+        <div class="upload-div">
+            <form id="uploadForm" method="post" action=""  enctype="multipart/form-data" >
+                <span class="upload-fileinput-button">
+                    <span style="font-size: 30px;">点击选择文件</span><input type="file" onchange="upload()">
+                </span>
+            </form>
+        </div>
+        
+        <!-- 检索条件 -->
+        <div style="height: 120px;">
+            <!-- app类型 -->
+            <div style="float: left;">
+                <div class="search-div">
+                    <div class="app-type search-base-div search-left-div search-select-div">
+                        <div class="search-font-base-div" type="1">IOS</div>
+                    </div>
+                    <div class="app-type search-base-div search-right-div" style="width: 90px;">
+                        <div class="search-font-base-div" style="width: 65px;" type="2">Andorid</div>
+                    </div>
+                </div>
+            </div>
+            <!-- app环境 -->
+            <div style="float: left; margin: 0 0 0 10px;">
+                <div class="search-div">
+                    <div class="env-type search-base-div search-left-div search-select-div">
+                        <div class="search-font-base-div" type="1">生产</div>
+                    </div>
+                    <div class="env-type search-base-div search-next-left-div" style="width: 70px;">
+                        <div class="search-font-base-div" style="width:50px" type="2">预发布</div>
+                    </div>
+                    <div class="env-type search-base-div search-right-div">
+                        <div class="search-font-base-div" type="3">测试</div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- app系统类型 -->
+            <div style="float: left; margin: 0 0 0 10px;">
+                <div class="search-div">
+                    <div class="sys-type search-base-div search-left-div search-select-div" style="width: 70px;">
+                        <div class="search-font-base-div" style="width: 50px" type="1">乾坤袋</div>
+                    </div>
+                    <div class="sys-type search-base-div search-next-left-div" style="width: 80px;">
+                        <div class="search-font-base-div" style="width: 60px" type="2">鸿坤金服</div>
+                    </div>
+                    <div class="sys-type search-base-div search-next-left-div" style="width: 70px;">
+                        <div class="search-font-base-div" style="width: 50px" type="3">财享+</div>
+                    </div>
+                    <div class="sys-type search-base-div search-right-div" style="width: 70px;">
+                        <div class="search-font-base-div" style="width: 50px" type="4">前生活</div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div style="float: left; margin: 0 0 0 10px;">
+                <div>
+                    <div style="float: left;">
+                        <input type="text" name="searchTmp" id="searchTmp" placeholder=" 名称/版本" style="width: 250px; height: 26px; border-radius: 10px 10px 10px 10px; padding: 1px 1px 1px 1px; border: 2px solid #a1a1a1;">
+                    </div>
+                    <div style="float: left; margin: 6px 0 0 -30px;" id="searchImg">
+                        <img src="img/search.ico" style="width: 20px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <br>
+        <!-- 数据区 -->
+        <div id="data">
+            <div class="data-div" >
+                <div class="data-info-div">
+                    <div class="data-img-div">
+                        <img src="default.png">
+                    </div>
+                    <div class="data-detail-div">
+                        <div style="height:28px;">
+                            <img src="img/ios.ico" style="width: 40px;float: left;"><div class="data-label-span">鸿坤金服</div>
+                        </div><br/>
+                        <span class="data-detail-label-span">环境：</span><span class="data-detail-span">预发布</span><br/>
+                        <span class="data-detail-label-span">系统：</span><span class="data-detail-span">鸿坤金服</span><br/>
+                        <span class="data-detail-label-span">包名：</span><span class="data-detail-span">com.yiruntz.qiankundai</span><br/>
+                        <span class="data-detail-label-span">版本：</span><span class="data-detail-span">1.2.2(Build 1.0)</span><br/>
+                        <span class="data-detail-label-span">时间：</span><span class="data-detail-span">2018-01-18</span><br/>
+                    </div>
+                    <div>
+                        <div class="del data-del-div" code=""><img src="img/del.ico" style="width: 40px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="height: 10px;"></div>
+        </div>
+        <br/>
+        <div class="data-more-div">
+            <span id="loadMore">加载更多</span>
+        </div>
+        <div style="margin-top: 15px; margin-left: 45%; float: left; color: #108ee9;">@copyright dobe</div>
+    </div>
+</div>
+
+
+
+<form id="appInfoForm" method="post" action=""  enctype="multipart/form-data" >
+    <input type="hidden" name="appType" id="appType" value="1">
+    <input type="hidden" name="envType" id="envType" value="3">
+    <input type="hidden" name="sysType" id="sysType" value="1">
+    <input type="hidden" name="start" id="start" value="0">
+    <input type="hidden" name="rows" id="rows" value="10">
+    <input type="hidden" name="search" id="search" value="">
+</form>
+</body>
 <script>
-    $.ajax({
-        type: "POST",
-        url: "manage/list",
-        data: "",
-        success: function(msg){
-            console.info( "Data Saved: " + msg );
-        }
+    $(function(){
+        loadData();
+        bindClick("app-type", "appType");
+        bindClick("env-type", "enVType");
+        bindClick("sys-type", "sysType");
+        $("#loadMore").click(function(){
+            $("#start").val(parseInt($("#start").val()) + parseInt($("#rows").val()));
+            loadData();
+        });
+        $("#searchImg").click(function(){
+            $("#search").val($("#searchTmp").val());
+            loadData();
+        });
     });
+    
+    
+    function bindClick(clzss, id){
+        $("." + clzss).each(function(){
+            $(this).click(function(){
+                $("." + clzss).each(function(){
+                    $(this).removeClass("search-select-div");
+                    $(this).find("div").removeClass("search-select-font-div");
+                });
+                $(this).addClass("search-select-div");
+                $(this).find("div").addClass("search-select-font-div");
+                console.info($(this).find("div").attr("type"));
+                $("#" + id).val($(this).find("div").attr("type"));
+            });
+        });
+    }
+    
+    function loadData(){
+        $.ajax({
+            type: "POST",
+            url: "manage/list",
+            data: "",
+            success: function(data){
+                if(data.length == 0){
+                    alert("好尴尬啊, 没有数据哦");
+                    return;
+                } 
+                for(var i in data){
+                    var o = data[i];
+                    var appType="ios.ico";
+                    if(o.appType == "2"){
+                        appType="android.ico";
+                    }
+                    var envType = "生产";
+                    if(o.envType == "2"){
+                        envType = "预发布";
+                    }else if(o.envType == "3"){
+                        envType = "测试";
+                    }
+                    var sysType="乾坤袋";
+                    if(o.sysType == "2"){
+                        envType = "鸿坤金服";
+                    }else if(o.sysType == "3"){
+                        envType = "财享+";
+                    }else if(o.sysType == "4"){
+                        envType = "前生活";
+                    }
+                    msg = "<div id=\"" + o.code + "\"class=\"data-div\" ><div class=\"data-info-div\">\n" +
+                        "            <div class=\"data-img-div\">\n" +
+                        "                <img src=\"default.png\">\n" +
+                        "            </div>\n" +
+                        "            <div class=\"data-detail-div\">\n" +
+                        "                <div style=\"height:28px;\">\n" +
+                        "                    <img src=\"img/" + appType + "\" style=\"width: 40px;float: left;\"><div class=\"data-label-span\">" + o.label + "</div>\n" +
+                        "                </div><br/>\n" +
+                        "                <span class=\"data-detail-label-span\">环境：</span><span class=\"data-detail-span\">" + envType + "</span><br/>\n" +
+                        "                <span class=\"data-detail-label-span\">系统：</span><span class=\"data-detail-span\">" + sysType + "</span><br/>\n" +
+                        "                <span class=\"data-detail-label-span\">包名：</span><span class=\"data-detail-span\">" + o.packageName + "</span><br/>\n" +
+                        "                <span class=\"data-detail-label-span\">版本：</span><span class=\"data-detail-span\">" + o.versionName + "(Build " + o.versionCode + ")</span><br/>\n" +
+                        "                <span class=\"data-detail-label-span\">时间：</span><span class=\"data-detail-span\">" + o.time + "</span><br/>\n" +
+                        "            </div>\n" +
+                        "            <div>\n" +
+                        "                <div class=\"del data-del-div\" code=\"" + o.code + "\"><img src=\"img/del.ico\" style=\"width: 40px;\"></div>\n" +
+                        "            </div>\n" +
+                        "        </div></div><div style=\"height: 10px;\"></div>";
+                    $("#data").append(msg);
+                    
+                    $(".del").each(function(){
+                        $(this).click(function(){
+                            console.info($(this).attr("code"));
+                            var code = $(this).attr("code");
+                            $.ajax({
+                                type: "POST",
+                                url: "manage/del",
+                                data: "",
+                                success: function(data){
+                                    $("#" + code).remove();        
+                                }
+                            });
+                        });
+                    });
+                }
+                
+            }
+        });
+    }
 
     function upload(){
         $.ajax({
@@ -32,7 +242,7 @@
             processData: false,
             contentType: false
         }).done(function(res) {
-            console.info(res);
+            loadData();
         }).fail(function(res) {
             console.info(res);
         });

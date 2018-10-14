@@ -16,6 +16,16 @@ public class Constants {
     * 失败
     */
     public final static String ERROR = "ERROR";
+    public final static int ALL = 999;
+
+    /**
+     * D:/test/app  C:/soft/test/app
+     */
+    public static String APP_PATH = "C:/soft/test/app";
+    /*
+    * 数据存储位置
+    */
+    public final static String APP_DB_PATH = "db.ini";
 
     /**
     * android后缀
@@ -28,11 +38,7 @@ public class Constants {
     /**
     * 默认app图标
     */
-    public final static String APP_ICON = "default.icon";
-    /**
-    * D:/test/app
-    */
-    public final static String APP_PATH = "C:/soft/test/app";
+    public final static String APP_ICON = "default.png";
     /**
     * android app存储路径
     */
@@ -78,4 +84,5 @@ public class Constants {
     * app类型 前生活
     */
     public final static int APP_SYS_TYPE_QSH = 4;
+    
 }

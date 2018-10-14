@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.transform.Source;
@@ -22,6 +23,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -74,7 +76,57 @@ public class ManageServiceImpl implements ManageService {
         }
         return Constants.ERROR;
     }
-    
+
+    @Override
+    public List<AppInfo> findAppInfoList(AppInfo appInfo) {
+        List<AppInfo> list = repositoryService.findAppInfoList();
+        if(list != null){
+            List<AppInfo> result = list.stream().filter(o -> {
+                if(Constants.ALL != appInfo.getAppType()){
+                    return appInfo.getAppType().equals(o.getAppType());
+                }
+                return true;
+            }).filter(o -> {
+                if(Constants.ALL != appInfo.getEnvType()){
+                    return appInfo.getEnvType().equals(o.getEnvType());
+                }
+                return true;
+            }).filter(o -> {
+                if(Constants.ALL != appInfo.getSysType()){
+                    return appInfo.getSysType().equals(o.getSysType());
+                }
+                return true;
+            }).filter(o -> {
+                if(Constants.ALL != appInfo.getSysType()){
+                    return appInfo.getSysType().equals(o.getSysType());
+                }
+                return true;
+            }).filter(o -> {
+                if(!StringUtils.isEmpty(appInfo.getLabel())){
+                    return o.getLabel().toUpperCase().contains(appInfo.getLabel().toUpperCase());
+                }
+                return true;
+            }).filter(o -> {
+                if(!StringUtils.isEmpty(appInfo.getVersionName())){
+                    return o.getVersionName().toUpperCase().contains(appInfo.getVersionName().toUpperCase());
+                }
+                return true;
+            }).sorted(Comparator.comparing(AppInfo::getTime)).collect(Collectors.toList());
+            Integer total = result.size();
+            if(total < appInfo.getStart()){
+                return Collections.emptyList();
+            }
+            Integer maxRows = total - appInfo.getStart();
+            return result.subList(appInfo.getStart(), maxRows > appInfo.getRows() ? appInfo.getRows(): maxRows);
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Integer delAppInfo(String code) {
+        return this.repositoryService.delAppInfo(code);
+    }
+
     /**
     *  解析app
     *  @param appInfo   app包信息
