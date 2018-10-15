@@ -7,8 +7,8 @@ import com.dobe.appserver.model.AppInfo;
 import com.dobe.appserver.service.ManageService;
 import com.dobe.appserver.utils.DateUtils;
 import com.dobe.appserver.utils.FileUtils;
+import com.dobe.appserver.utils.QRCodeUtils;
 import com.dobe.appserver.utils.SpecialCodeGenerateUtils;
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.Appinfo;
 import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.slf4j.Logger;
@@ -16,13 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -70,6 +69,7 @@ public class ManageServiceImpl implements ManageService {
                 if(appInfo.isState()){
                     //持久化安装包信息
                     if(this.repositoryService.saveAppInfo(appInfo) > 0){
+                        //生成二维码图片
                         return Constants.SUCCESS;
                     }
                 }
@@ -246,5 +246,12 @@ public class ManageServiceImpl implements ManageService {
             }
         }
         return "";
+    }
+    
+    private void creatQr(AppInfo appInfo) throws Exception{
+        String logoFilePath = new File(ResourceUtils.getURL("classpath:").getPath()).getAbsolutePath() + "/static/img/app.jpg";
+        String filePath = (appInfo.getFileName().endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + appInfo.getCode() + ".jpg";
+        QRCodeUtils.encode("http://baidu.com", 256, 256, Constants.APP_PATH + File.separator + filePath, logoFilePath);
+
     }
 }
