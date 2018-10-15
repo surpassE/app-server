@@ -163,3 +163,6 @@
 [DEBUG][2018-10-15 17:50:41,568][com.sirding.service.impl.SecServiceImpl]从【D:/test/app\db.ini】文件中加载配置信息
 [DEBUG][2018-10-15 17:50:42,206][com.sirding.service.impl.SecServiceImpl]从【D:/test/app\db.ini】文件中加载配置信息
 [DEBUG][2018-10-15 17:50:45,623][com.sirding.service.impl.SecServiceImpl]从【D:/test/app\db.ini】文件中加载配置信息
+[DEBUG][2018-10-15 17:57:56,717][com.sirding.service.impl.SecServiceImpl]从【D:/test/app\db.ini】文件中加载配置信息
+[DEBUG][2018-10-15 17:58:01,248][com.sirding.service.impl.SecServiceImpl]从【D:/test/app\db.ini】文件中加载配置信息
+[DEBUG][2018-10-15 17:58:03,414][com.sirding.service.impl.SecServiceImpl]从【D:/test/app\db.ini】文件中加载配置信息
