@@ -7,13 +7,13 @@
 
     <link rel="stylesheet" href="css/index.css">
     <script src="jslib/jquery-3.3.1.min.js"></script>
+    <script src="jslib/sweetalert2/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="jslib/sweetalert2/sweetalert2.min.css">
 
 </head>
 <body>
 
-<div id="nav" style="width: 100px; background-color: red">
-    <div>hello</div>
-</div>
+
 <div>
     <!-- 头部描述 -->
     <div class="app-server-div">AppServer</div>
@@ -21,16 +21,12 @@
         <div class="home-div">Home</div>
         
         <!-- 文件拖拽 -->
-        <div class="upload-div">
-            <form id="uploadForm" method="post" action=""  enctype="multipart/form-data" >
-                <span class="upload-fileinput-button">
-                    <span style="font-size: 30px;">点击选择文件</span><input type="file" onchange="upload()">
-                </span>
-            </form>
+        <div class="upload-pre-div">
+            <span onclick="javascript:$('#uploadDiv').show()" style="font-size: 30px;">上传APP应用</span>
         </div>
         
         <!-- 检索条件 -->
-        <div style="height: 120px;">
+        <div style="height: 60px;">
             <!-- app类型 -->
             <div style="float: left;">
                 <div class="search-div">
@@ -78,7 +74,7 @@
             <div style="float: left; margin: 0 0 0 10px;">
                 <div>
                     <div style="float: left;">
-                        <input type="text" name="searchTmp" id="searchTmp" placeholder=" 名称/版本" style="width: 250px; height: 26px; border-radius: 10px 10px 10px 10px; padding: 1px 1px 1px 1px; border: 2px solid #a1a1a1;">
+                        <input type="text" onchange="javascript:$('#search').val(this.value)" placeholder=" 名称/版本" style="width: 250px; height: 26px; border-radius: 10px 10px 10px 10px; padding: 1px 1px 1px 1px; border: 2px solid #a1a1a1;">
                     </div>
                     <div style="float: left; margin: 6px 0 0 -30px;" id="searchImg">
                         <img src="img/search.ico" style="width: 20px;">
@@ -86,11 +82,15 @@
                 </div>
             </div>
         </div>
-        
         <br>
+        
         <!-- 数据区 -->
         <div id="data">
-            <div class="data-div" >
+            <div class="data-no-div" id="noData">
+                <div>暂无记录</div>
+                <!--<div><img src="img/sad.ico" style="width: 20px;"></div>-->
+            </div>
+            <!--<div class="data-div" >
                 <div class="data-info-div">
                     <div class="data-img-div">
                         <img src="default.png">
@@ -110,9 +110,11 @@
                     </div>
                 </div>
             </div>
-            <div style="height: 10px;"></div>
+            <div style="height: 10px;"></div>-->
         </div>
-        <br/>
+        <div id="noMore" class="data-no-more-div">
+            <span>好尴尬，没有加载到更多...</span>
+        </div>
         <div class="data-more-div">
             <span id="loadMore">加载更多</span>
         </div>
@@ -120,7 +122,14 @@
     </div>
 </div>
 
+<a href="#" onclick="ShowDiv(1)"></a>
+<div id="ceng" style="position:absolute;z-index:2;left:0;top:0;right:0;background-color:#000;filter:alpha(opacity=50);margin:1px 1px;display:none;width:100%;height:100%;text-align:center;">
+</div>
 
+<div id="close" style="position:absolute !important;left:30%;top:0px;z-index:3;border:1px solid #ff6600;background-color:#fff;margin:100px auto;padding:0px;display:none;width:400px;height:300px;text-align:right">
+    <a href="#" onclick="ShowDiv(0)">关闭</a>
+    <div style="text-align:center;"></div>
+</div>
 
 <form id="appInfoForm" method="post" action=""  enctype="multipart/form-data" >
     <input type="hidden" name="appType" id="appType" value="1">
@@ -131,121 +140,4 @@
     <input type="hidden" name="search" id="search" value="">
 </form>
 </body>
-<script>
-    $(function(){
-        loadData();
-        bindClick("app-type", "appType");
-        bindClick("env-type", "enVType");
-        bindClick("sys-type", "sysType");
-        $("#loadMore").click(function(){
-            $("#start").val(parseInt($("#start").val()) + parseInt($("#rows").val()));
-            loadData();
-        });
-        $("#searchImg").click(function(){
-            $("#search").val($("#searchTmp").val());
-            loadData();
-        });
-    });
-    
-    
-    function bindClick(clzss, id){
-        $("." + clzss).each(function(){
-            $(this).click(function(){
-                $("." + clzss).each(function(){
-                    $(this).removeClass("search-select-div");
-                    $(this).find("div").removeClass("search-select-font-div");
-                });
-                $(this).addClass("search-select-div");
-                $(this).find("div").addClass("search-select-font-div");
-                console.info($(this).find("div").attr("type"));
-                $("#" + id).val($(this).find("div").attr("type"));
-            });
-        });
-    }
-    
-    function loadData(){
-        $.ajax({
-            type: "POST",
-            url: "manage/list",
-            data: "",
-            success: function(data){
-                if(data.length == 0){
-                    alert("好尴尬啊, 没有数据哦");
-                    return;
-                } 
-                for(var i in data){
-                    var o = data[i];
-                    var appType="ios.ico";
-                    if(o.appType == "2"){
-                        appType="android.ico";
-                    }
-                    var envType = "生产";
-                    if(o.envType == "2"){
-                        envType = "预发布";
-                    }else if(o.envType == "3"){
-                        envType = "测试";
-                    }
-                    var sysType="乾坤袋";
-                    if(o.sysType == "2"){
-                        envType = "鸿坤金服";
-                    }else if(o.sysType == "3"){
-                        envType = "财享+";
-                    }else if(o.sysType == "4"){
-                        envType = "前生活";
-                    }
-                    msg = "<div id=\"" + o.code + "\"class=\"data-div\" ><div class=\"data-info-div\">\n" +
-                        "            <div class=\"data-img-div\">\n" +
-                        "                <img src=\"default.png\">\n" +
-                        "            </div>\n" +
-                        "            <div class=\"data-detail-div\">\n" +
-                        "                <div style=\"height:28px;\">\n" +
-                        "                    <img src=\"img/" + appType + "\" style=\"width: 40px;float: left;\"><div class=\"data-label-span\">" + o.label + "</div>\n" +
-                        "                </div><br/>\n" +
-                        "                <span class=\"data-detail-label-span\">环境：</span><span class=\"data-detail-span\">" + envType + "</span><br/>\n" +
-                        "                <span class=\"data-detail-label-span\">系统：</span><span class=\"data-detail-span\">" + sysType + "</span><br/>\n" +
-                        "                <span class=\"data-detail-label-span\">包名：</span><span class=\"data-detail-span\">" + o.packageName + "</span><br/>\n" +
-                        "                <span class=\"data-detail-label-span\">版本：</span><span class=\"data-detail-span\">" + o.versionName + "(Build " + o.versionCode + ")</span><br/>\n" +
-                        "                <span class=\"data-detail-label-span\">时间：</span><span class=\"data-detail-span\">" + o.time + "</span><br/>\n" +
-                        "            </div>\n" +
-                        "            <div>\n" +
-                        "                <div class=\"del data-del-div\" code=\"" + o.code + "\"><img src=\"img/del.ico\" style=\"width: 40px;\"></div>\n" +
-                        "            </div>\n" +
-                        "        </div></div><div style=\"height: 10px;\"></div>";
-                    $("#data").append(msg);
-                    
-                    $(".del").each(function(){
-                        $(this).click(function(){
-                            console.info($(this).attr("code"));
-                            var code = $(this).attr("code");
-                            $.ajax({
-                                type: "POST",
-                                url: "manage/del",
-                                data: "",
-                                success: function(data){
-                                    $("#" + code).remove();        
-                                }
-                            });
-                        });
-                    });
-                }
-                
-            }
-        });
-    }
-
-    function upload(){
-        $.ajax({
-            url: 'manage/upload',
-            type: 'POST',
-            cache: false,
-            data: new FormData($('#uploadForm')[0]),
-            processData: false,
-            contentType: false
-        }).done(function(res) {
-            loadData();
-        }).fail(function(res) {
-            console.info(res);
-        });
-    }
-</script>
 </html>

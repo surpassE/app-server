@@ -65,6 +65,17 @@ public class AppInfo implements Serializable {
     
     private Integer start = 0;
     private Integer rows = 5;
+    /**
+    * 查询条件
+    */
+    private String search;
+    
+    /**
+    * 解析过程中状态
+    */
+    private boolean state = true;
+    @Option
+    private String md5;
     
 
     public String getCode() {
@@ -175,8 +186,9 @@ public class AppInfo implements Serializable {
         return start;
     }
 
-    public void setStart(Integer start) {
+    public AppInfo setStart(Integer start) {
         this.start = start;
+        return this;
     }
 
     public Integer getRows() {
@@ -185,6 +197,30 @@ public class AppInfo implements Serializable {
 
     public void setRows(Integer rows) {
         this.rows = rows;
+    }
+
+    public String getSearch() {
+        return search;
+    }
+
+    public void setSearch(String search) {
+        this.search = search;
+    }
+    public boolean isState() {
+        return state;
+    }
+
+    public AppInfo setState(boolean state) {
+        this.state = state;
+        return this;
+    }
+
+    public String getMd5() {
+        return md5;
+    }
+
+    public void setMd5(String md5) {
+        this.md5 = md5;
     }
 
     @Override

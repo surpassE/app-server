@@ -35,5 +35,9 @@ public interface RepositoryService {
     *  @date                    ：2018/10/12
     *  @author                  ：zc.ding@foxmail.com
     */
-    List<AppInfo> findAppInfoList();
+    List<AppInfo> findAppInfoList(AppInfo appInfo);
+    
+    boolean existMd5(String md5);
+    
+    AppInfo findAppInfoByCode(String code);
 }

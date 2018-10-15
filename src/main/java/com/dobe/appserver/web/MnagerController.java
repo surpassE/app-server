@@ -29,24 +29,12 @@ public class MnagerController {
     
     @RequestMapping("list")
     public List<AppInfo> list(AppInfo appInfo){
-        AppInfo app = new AppInfo();
-        app.setCode("hello");
-        app.setLabel("鸿坤金服");
-        app.setIcon("default.png");
-        app.setPackageName("com.yirun.qiankundai");
-        app.setVersionCode("1.0.0");
-        app.setVersionName("1.10");
-        app.setEnvType(1);
-        app.setAppType(2);
-        app.setSysType(2);
-        app.setTime(DateUtils.format());
-//        return Collections.singletonList(app);
         return manageService.findAppInfoList(appInfo);
     }
     
     @RequestMapping("upload")
-    public String upload(MultipartFile file){
-        return this.manageService.upload(file);
+    public String upload(MultipartFile file, Integer envType, Integer sysType){
+        return this.manageService.upload(file, envType, sysType);
     }
     
     @RequestMapping("del")

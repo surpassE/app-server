@@ -5,27 +5,25 @@ import com.dobe.appserver.constants.Constants;
 import com.dobe.appserver.dao.RepositoryService;
 import com.dobe.appserver.model.AppInfo;
 import com.dobe.appserver.service.ManageService;
+import com.dobe.appserver.utils.DateUtils;
+import com.dobe.appserver.utils.FileUtils;
 import com.dobe.appserver.utils.SpecialCodeGenerateUtils;
 import com.sun.xml.internal.bind.v2.schemagen.xmlschema.Appinfo;
 import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
-import net.dongliu.apk.parser.bean.IconFace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Source;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
@@ -36,95 +34,75 @@ import java.util.zip.ZipInputStream;
  */
 @Service
 public class ManageServiceImpl implements ManageService {
-    
     private static final Logger logger = LoggerFactory.getLogger(ManageServiceImpl.class);
+    
     
     @Autowired
     @Qualifier("inIRepositoryServiceImpl")
     private RepositoryService repositoryService;
     
     @Override
-    public String upload(MultipartFile file) {
-        String code = SpecialCodeGenerateUtils.getSpecialNumCode();
-        AppInfo appInfo = new AppInfo();
-        String fileName = Optional.ofNullable(file.getOriginalFilename()).orElse("").toLowerCase();
-        appInfo.setCode(code);
-        appInfo.setFileName(fileName);
-        appInfo.setFileSize(file.getSize());
-        appInfo.setAppType(fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_TYPE_ANDROID : Constants.APP_TYPE_IOS);
-        appInfo.setSuffix(fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_SUFFIX_ANDROID : Constants.APP_SUFFIX_IOS);
-        //本地存储路径
-        String filePath = fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS + code + appInfo.getSuffix();
-        logger.info("save file path: {}", filePath);
-        //存储文件
-        try(InputStream is = file.getInputStream();
-            OutputStream os = new FileOutputStream(filePath)){
-            byte[] buf = new byte[2048];
-            int length;
-            while((length = is.read()) > 0){
-                os.write(buf, 0, length);
+    public String upload(MultipartFile file, Integer envType, Integer sysType){
+        try{
+            String md5 = FileUtils.getFileMD5(file.getInputStream());
+            if(this.repositoryService.existMd5(md5)){
+                return "文件已经存在";
+            }
+            
+            String code = SpecialCodeGenerateUtils.getSpecialNumCode();
+            AppInfo appInfo = new AppInfo();
+            String fileName = Optional.ofNullable(file.getOriginalFilename()).orElse("").toLowerCase();
+            appInfo.setCode(code);
+            appInfo.setFileName(fileName);
+            appInfo.setFileSize(file.getSize());
+            appInfo.setEnvType(envType);
+            appInfo.setSysType(sysType);
+            appInfo.setMd5(md5);
+            appInfo.setAppType(fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_TYPE_ANDROID : Constants.APP_TYPE_IOS);
+            appInfo.setSuffix(fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_SUFFIX_ANDROID : Constants.APP_SUFFIX_IOS);
+            appInfo.setTime(DateUtils.format());
+            //本地存储路径
+            String filePath = (fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + code + appInfo.getSuffix();
+            logger.info("save file path: {}", filePath);
+            if(FileUtils.saveFile(file.getInputStream(), filePath)){
+                //解析app安装包
+                this.parseApp(appInfo, filePath);
+                if(appInfo.isState()){
+                    //持久化安装包信息
+                    if(this.repositoryService.saveAppInfo(appInfo) > 0){
+                        return Constants.SUCCESS;
+                    }
+                }
             }
         }catch (Exception e){
-            logger.error("save upload file error. fileName: {}", appInfo.getFileName(), e);
-            return Constants.ERROR;
-        }
-        //解析app安装包
-        this.parseApp(appInfo, filePath);
-        //持久化安装包
-        if(this.repositoryService.saveAppInfo(appInfo) > 0){
-            return Constants.SUCCESS;
+            logger.error("upload app package fail.",  e);
         }
         return Constants.ERROR;
     }
 
     @Override
     public List<AppInfo> findAppInfoList(AppInfo appInfo) {
-        List<AppInfo> list = repositoryService.findAppInfoList();
-        if(list != null){
-            List<AppInfo> result = list.stream().filter(o -> {
-                if(Constants.ALL != appInfo.getAppType()){
-                    return appInfo.getAppType().equals(o.getAppType());
-                }
-                return true;
-            }).filter(o -> {
-                if(Constants.ALL != appInfo.getEnvType()){
-                    return appInfo.getEnvType().equals(o.getEnvType());
-                }
-                return true;
-            }).filter(o -> {
-                if(Constants.ALL != appInfo.getSysType()){
-                    return appInfo.getSysType().equals(o.getSysType());
-                }
-                return true;
-            }).filter(o -> {
-                if(Constants.ALL != appInfo.getSysType()){
-                    return appInfo.getSysType().equals(o.getSysType());
-                }
-                return true;
-            }).filter(o -> {
-                if(!StringUtils.isEmpty(appInfo.getLabel())){
-                    return o.getLabel().toUpperCase().contains(appInfo.getLabel().toUpperCase());
-                }
-                return true;
-            }).filter(o -> {
-                if(!StringUtils.isEmpty(appInfo.getVersionName())){
-                    return o.getVersionName().toUpperCase().contains(appInfo.getVersionName().toUpperCase());
-                }
-                return true;
-            }).sorted(Comparator.comparing(AppInfo::getTime)).collect(Collectors.toList());
-            Integer total = result.size();
-            if(total < appInfo.getStart()){
-                return Collections.emptyList();
-            }
-            Integer maxRows = total - appInfo.getStart();
-            return result.subList(appInfo.getStart(), maxRows > appInfo.getRows() ? appInfo.getRows(): maxRows);
-        }
-        return Collections.emptyList();
+        return repositoryService.findAppInfoList(appInfo);
     }
-
+    
     @Override
     public Integer delAppInfo(String code) {
-        return this.repositoryService.delAppInfo(code);
+        AppInfo appInfo = this.repositoryService.findAppInfoByCode(code);
+        if(appInfo != null){
+            String basePath = appInfo.getAppType() == Constants.APP_TYPE_ANDROID ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS + File.separator + code;
+            //删除安装包
+            File file = new File(basePath + appInfo.getSuffix());
+            if(file.exists()){
+                file.delete();
+            }
+            //删除图标
+            file = new File(basePath + Constants.APP_ICON_SUFFIX);
+            if(file.exists()){
+                file.delete();
+            }
+            return this.repositoryService.delAppInfo(code);
+        }
+        return 0;
     }
 
     /**
@@ -144,8 +122,9 @@ public class ManageServiceImpl implements ManageService {
             }
         }catch (Exception e){
             logger.error("parse app fail.", e);
+            appInfo.setState(false);
         }
-        return appInfo;
+        return appInfo.setState(true);
     }
     
     /**
@@ -164,8 +143,9 @@ public class ManageServiceImpl implements ManageService {
         appInfo.setVersionName(apkMeta.getVersionName()); 
         appInfo.setPackageName(apkMeta.getPackageName());
         apkFile.getAllIcons().parallelStream().min(Comparator.comparingInt(o -> o.getData().length)).ifPresent(iconFace -> {
-            appInfo.setIcon(Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + "_" + Paths.get(iconFace.getPath()).getFileName().toString());
-            this.saveIcon(Paths.get(appInfo.getIcon()), iconFace.getData());
+            appInfo.setIcon(appInfo.getCode() + "_" + Paths.get(iconFace.getPath()).getFileName().toString());
+            String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getIcon();
+            FileUtils.saveFile(Paths.get(iconPath), iconFace.getData());
         });
         logger.info("{}", appInfo);
         return appInfo;
@@ -193,7 +173,7 @@ public class ManageServiceImpl implements ManageService {
                 NSArray nsArray = (NSArray)obj;
                 if(nsArray.count() > 0){
                     iconNameReg = nsArray.objectAtIndex(0).toJavaObject().toString();
-                    if(!iconNameReg.endsWith(".png")){
+                    if(!iconNameReg.endsWith(Constants.APP_ICON_SUFFIX)){
                         iconNameReg = ".+" + iconNameReg + "@\\dx\\.png";
                     }
                 }
@@ -201,8 +181,9 @@ public class ManageServiceImpl implements ManageService {
             Optional.ofNullable(iconNameReg).ifPresent(o -> {
                 List<Object> iconList = getIpaInputStream(filePath, o);
                 if(iconList != null){
-                    appInfo.setIcon(Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + "_" + iconList.get(1));
-                    this.saveIcon(Paths.get(appInfo.getIcon()), (InputStream)(iconList.get(0)));
+                    appInfo.setIcon(appInfo.getCode() + "_" + iconList.get(1));
+                    String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getIcon();
+                    FileUtils.saveFile(Paths.get(iconPath), iconList.get(0));
                 }
             });
         }
@@ -242,34 +223,7 @@ public class ManageServiceImpl implements ManageService {
         return null;
     }
 
-    /**
-    *  保存icon图片
-    *  @param path 文件地址
-    *  @param data   icon流或字节数组
-    *  @date                    ：2018/10/12
-    *  @author                  ：zc.ding@foxmail.com
-    */
-    private void saveIcon(Path path, Object data){
-        try {
-            byte[] buf;
-            if(data instanceof InputStream){
-                InputStream inputStream = (InputStream)data;
-                buf = new byte[inputStream.available()];
-                inputStream.read(buf);
-            }else{
-                buf = (byte[])data;
-            }
-            Files.createDirectories(path.getParent());
-            File file = path.toFile();
-            if(file.exists()){
-                logger.info("delete exist file path: {}, state: {}", file.getAbsoluteFile(), file.delete());
-            }
-            Files.createFile(path);
-            Files.write(path, buf);
-        }catch (Exception e){
-            logger.error("save app icon error.", e);
-        }
-    } 
+    
 
     /**
      *  读取配置文件中的key dict string
@@ -293,18 +247,4 @@ public class ManageServiceImpl implements ManageService {
         }
         return "";
     }
-
-    public static void main(String[] args) throws Exception{
-        ManageServiceImpl m = new ManageServiceImpl();
-//        String filePath = "C:\\soft\\test\\gudiacidian.ipa";
-        String filePath = "D:\\test\\app\\android\\CXJ_ANDROID_1.0.0.apk";
-        m.parseApk(new AppInfo(), filePath);
-//        String filePath = "C:\\soft\\test\\gudiacidian.ipa";
-//        String filePath = "D:\\test\\app\\ios\\qiankundai.ipa";
-//        m.parseIpa(new AppInfo(), filePath);
-    }
-    
-    
-    
-    
 }

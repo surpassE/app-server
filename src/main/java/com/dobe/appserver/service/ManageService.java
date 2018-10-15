@@ -11,11 +11,13 @@ public interface ManageService {
     /**
     *  app安装包上传
     *  @param file
+    *  @param envType
+    *  @param sysType
     *  @return java.lang.String
     *  @date                    ：2018/10/14
     *  @author                  ：zc.ding@foxmail.com
     */
-    String upload(MultipartFile file);
+    String upload(MultipartFile file, Integer envType, Integer sysType);
     
     /**
     *  条件检索配置信息

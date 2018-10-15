@@ -16,7 +16,7 @@ body {
     font-weight: bold;
 }
 
-.upload-div {
+.upload-pre-div{
     border: 2px dashed #e9e9e9;
     height: 45px;
     width: auto;
@@ -24,6 +24,28 @@ body {
     text-align: center;
     padding: 20px;
     border-radius: 5px;
+}
+
+.upload-div {
+    width: 60%;
+    height: 200px;
+    position: absolute;
+    margin: 190px 20%;
+    border: 2px solid #00a854;
+    background-color: white;
+    display: none;
+}
+
+.upload-data-div{
+    margin: 12px 10px 0 0;
+    width: -webkit-fill-available;
+    text-align: center;
+}
+
+.uploda-data-select-div{
+    border-radius: 10px 10px 10px 10px;
+    width: 76px;
+    direction: rtl;
 }
 
 .upload-fileinput-button {
@@ -41,19 +63,22 @@ body {
     font-size: 200px;
 }
 
-/*查询样式*/
-.search-type {
-    text-align: center;
-    font-size: 18px;
-    float: left;
-    width: 85px;
-    height: 40px;
-    border-width: 2px 0 2px 2px;
-    border-style: solid;
-    border-radius: 4px 0 0 4px;
-    border-color: #e9e9e9;
+.upload-btn {
+    /*border-radius: 10px;*/
+    border: 1px solid #1234;
+    width: 125px;
+    height: 30px;
+    font-size: 15px;
+    color: cornflowerblue;
 }
 
+.upload-close-div {
+    float: right;
+    margin: -153px 3px 0 0;
+    /*border: 1px solid red;*/
+}
+
+/*查询样式*/
 /*search div*/
 .search-div {
     margin-top: 20px;
@@ -66,8 +91,7 @@ body {
     float: left;
     width: 55px;
     height: 30px;
-    border-style: solid;
-    border-color: lightgray;
+    border: 0 solid lightgray;
 }
 
 .search-left-div {
@@ -96,8 +120,6 @@ body {
 }
 
 .search-select-div {
-    /*background-color: lightgreen;*/
-    /*border-color: lightgreen;*/
     border-width: 2px;
     border-color: #108ee9;
 }
@@ -108,6 +130,16 @@ body {
     padding: 10px 40px 20px 25px;
     border: 2px solid #e9e9e9;
     border-radius: 4px;
+}
+
+.data-no-div {
+    width: -webkit-fill-available;
+    padding: 10px 40px 20px 25px;
+    border: 2px solid #e9e9e9;
+    border-radius: 4px;
+    text-align: center;
+    display: none;
+    margin: 0 0 10px 0;
 }
 
 .data-info-div {
@@ -126,8 +158,8 @@ body {
 }
 
 .data-del-div{
-    float: left;
-    margin: 134px 0 0 55%;
+    float: right;
+    /*margin: 134px 0 0 55%;*/
 }
 
 .data-label-span{
@@ -145,17 +177,21 @@ body {
     font-size: 14px;
 }
 
+.data-no-more-div{
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-size: 15px;
+    display: none;
+}
 .data-more-div {
     width: -webkit-fill-available;
     padding: 9px 0 5px 0;
     border-radius: 4px 0 0 4px;
-    border-width: 2px 2px 2px 2px;
     text-align: center;
     font-size: 18px;
     float: left;
     height: 30px;
-    border-style: solid;
-    border-color: lightgray;
+    border: 2px solid lightgray;
     color:gray;
 }
 

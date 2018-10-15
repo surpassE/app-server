@@ -16,16 +16,19 @@ public class Constants {
     * 失败
     */
     public final static String ERROR = "ERROR";
-    public final static int ALL = 999;
-
     /**
      * D:/test/app  C:/soft/test/app
      */
-    public static String APP_PATH = "C:/soft/test/app";
-    /*
+    public static String APP_PATH = "D:/test/app";
+    /**
     * 数据存储位置
     */
     public final static String APP_DB_PATH = "db.ini";
+    
+    /**
+    * 图标后缀
+    */
+    public final static String APP_ICON_SUFFIX = ".png";
 
     /**
     * android后缀
