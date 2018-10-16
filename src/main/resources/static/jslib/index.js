@@ -1,32 +1,13 @@
 var success = "SUCCESS";
-
-function ShowDiv(s)
-{
-    if(s>0)
-    {
-        document.getElementById('ceng').style.display='block';
-        document.getElementById('close').style.display='block';
-    }else{
-        document.getElementById('ceng').style.display='none';
-        document.getElementById('close').style.display='none';
-    }
-}
-
 $(function(){
     loadData();
     bindClick("app-type", "appType");
-    bindClick("env-type", "enVType");
-    bindClick("sys-type", "sysType");
     $("#loadMore").click(function(){
         $("#start").val(parseInt($("#start").val()) + parseInt($("#rows").val()));
         loadMoreData();
     });
     $("#searchImg").click(loadData);
-
-    // $(".upload-btn").click(uploadData);
 });
-
-
 
 function loadData(){
     $.ajax({
@@ -34,8 +15,9 @@ function loadData(){
         url: "manage/list",
         data: $("#appInfoForm").serialize(),
         success: function(data){
+            $("#data").empty();
             if(data.length == 0){
-                $("#noData").show();
+                $("#data").append("<div class=\"data-no-div\" id=\"noData\"><div>暂无记录</div></div>");
                 return;
             }
             renderData(data);
@@ -67,34 +49,18 @@ function renderData(data){
     $("#noData").hide();
     for(var i in data){
         var o = data[i];
-        var appType="ios.ico";
+        var appType="ios";
         if(o.appType == "2"){
-            appType="android.ico";
-        }
-        var envType = "生产";
-        if(o.envType == "2"){
-            envType = "预发布";
-        }else if(o.envType == "3"){
-            envType = "测试";
-        }
-        var sysType="乾坤袋";
-        if(o.sysType == "2"){
-            envType = "鸿坤金服";
-        }else if(o.sysType == "3"){
-            envType = "财享+";
-        }else if(o.sysType == "4"){
-            envType = "前生活";
+            appType="android";
         }
         msg = "<div id=\"" + o.code + "\"class=\"data-div\" ><div class=\"data-info-div\">\n" +
             "            <div class=\"data-img-div\">\n" +
-            "                <img src=\"img/default.png\">\n" +
+            "                <img src=\"apps/" + appType + "/" + o.code + ".png\">\n" +
             "            </div>\n" +
             "            <div class=\"data-detail-div\">\n" +
             "                <div style=\"height:28px;\">\n" +
-            "                    <img src=\"img/" + appType + "\" style=\"width: 40px;float: left;\"><div class=\"data-label-span\">" + o.label + "</div>\n" +
+            "                    <img src=\"img/" + appType + ".ico\" style=\"width: 40px;float: left;\"><div class=\"data-label-span\">" + o.label + "</div>\n" +
             "                </div><br/>\n" +
-            "                <span class=\"data-detail-label-span\">环境：</span><span class=\"data-detail-span\">" + envType + "</span><br/>\n" +
-            "                <span class=\"data-detail-label-span\">系统：</span><span class=\"data-detail-span\">" + sysType + "</span><br/>\n" +
             "                <span class=\"data-detail-label-span\">包名：</span><span class=\"data-detail-span\">" + o.packageName + "</span><br/>\n" +
             "                <span class=\"data-detail-label-span\">版本：</span><span class=\"data-detail-span\">" + o.versionName + "(Build " + o.versionCode + ")</span><br/>\n" +
             "                <span class=\"data-detail-label-span\">时间：</span><span class=\"data-detail-span\">" + o.time + "</span><br/>\n" +
@@ -102,12 +68,15 @@ function renderData(data){
             "            <div>\n" +
             "                <div class=\"del data-del-div\" code=\"" + o.code + "\"><img src=\"img/del.ico\" style=\"width: 20px;\"></div>\n" +
             "            </div>\n" +
+            "            <div>\n" +
+            "                <div class=\"data-del-div\"><img src=\"apps/" + appType + "/" + o.code + ".jpg\" class='qrCode' style=\"width: 27px;margin: -3px 0 0 0;\"></div>\n" +
+            "            </div>\n" +
             "        </div></div><div style=\"height: 10px;\"></div>";
         $("#data").append(msg);
 
         //绑定删除事件
         $(".del").each(function(){
-            $(this).click(function(){
+            $(this).unbind().click(function(){
                 var code = $(this).attr("code");
                 $.ajax({
                     type: "POST",
@@ -119,7 +88,39 @@ function renderData(data){
                 });
             });
         });
+
+        //绑定二维码显示事件
+        $(".qrCode").each(function(){
+            var src = $(this).attr("src");
+            console.info(src);
+            var tooltip = $("#tooltip");
+            $(this).mouseover(function(e){
+                var position = mousePosition(e);
+                console.info(position);
+                
+                var xOffset = 350;
+                var yOffset = 21;
+                tooltip.css("display","block").css("position","absolute").css("top",(position.y - yOffset) + "px").css("left",(position.x - xOffset) + "px");
+                tooltip.append("<img src='" + src + "' style='width:220px;'>");
+            });
+            $(this).mouseout(function(e){
+                tooltip.empty();
+                tooltip.css("display","none");
+            });
+        });
     }
+}
+
+//获取鼠标坐标
+function mousePosition(ev){
+    ev = ev || window.event;
+    if(ev.pageX || ev.pageY){
+        return {x:ev.pageX, y:ev.pageY};
+    }
+    return {
+        x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,
+        y:ev.clientY + document.body.scrollTop - document.body.clientTop
+    };
 }
 
 /**
@@ -136,8 +137,8 @@ function bindClick(clzss, id){
             });
             $(this).addClass("search-select-div");
             $(this).find("div").addClass("search-select-font-div");
-            console.info($(this).find("div").attr("type"));
             $("#" + id).val($(this).find("div").attr("type"));
+            loadData();
         });
     });
 }
@@ -145,18 +146,16 @@ function bindClick(clzss, id){
 function uploadData(){
     var file = document.getElementById('file');
     if(file.files[0] == undefined){
-        swal({title: "", text: "请选择文件", type: "error", confirmButtonText: "Cool"});
+        swal({title: "", text: "请选择文件", type: "error", confirmButtonText: "关闭"});
         return;
     }
     var fileName = file.files[0].name;
     if(fileName.indexOf(".ipa") < 0 && fileName.indexOf(".apk") < 0){
-        swal({title: "", text: "请选择IOS/Android对应的.ipa/.apk安装包", type: "error", confirmButtonText: "Cool"});
+        swal({title: "", text: "请选择IOS/Android对应的.ipa/.apk安装包", type: "error", confirmButtonText: "关闭"});
         return;
     }
     var formData = new FormData();
     formData.append("file", file.files[0]);
-    formData.append("envType", $("#envTypeSelect").val());
-    formData.append("sysType", $("#sysTypeSelect").val());
     $.ajax({
         url: 'manage/upload',
         type: 'POST',
@@ -167,8 +166,9 @@ function uploadData(){
     }).done(function(data) {
         if(data == success){
             $("#uploadDiv").hide();
+            loadData();
         }else{
-            swal({title: "", text: data, type: "error", confirmButtonText: "Cool"});
+            swal({title: "", text: data, type: "error", confirmButtonText: "关闭"});
         }
     }).fail(function(res) {
         console.info(res);

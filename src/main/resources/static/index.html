@@ -12,8 +12,6 @@
     <script src="jslib/index.js"></script>
 </head>
 <body>
-
-
 <div>
     <!-- 头部描述 -->
     <div class="app-server-div">AppServer</div>
@@ -22,15 +20,23 @@
         
         <!-- 文件拖拽 -->
         <div class="upload-pre-div">
-            <span onclick="javascript:$('#uploadDiv').show()" style="font-size: 30px;">上传APP应用</span>
+            <!--<span onclick="javascript:$('#uploadDiv').show()" style="font-size: 30px;">上传APP应用</span>-->
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <span class="upload-fileinput-button">
+                    <span style="font-size: 15px;">点击选择文件</span><input type="file" id="file" onchange="uploadData()">
+                </span>
+            </form>
         </div>
         
         <!-- 检索条件 -->
-        <div style="height: 60px;">
+        <div style="height: 50px;">
             <!-- app类型 -->
             <div style="float: left;">
                 <div class="search-div">
                     <div class="app-type search-base-div search-left-div search-select-div">
+                        <div class="search-font-base-div" type="999">ALL</div>
+                    </div>
+                    <div class="app-type search-base-div search-next-left-div">
                         <div class="search-font-base-div" type="1">IOS</div>
                     </div>
                     <div class="app-type search-base-div search-right-div" style="width: 90px;">
@@ -38,43 +44,11 @@
                     </div>
                 </div>
             </div>
-            <!-- app环境 -->
-            <div style="float: left; margin: 0 0 0 10px;">
-                <div class="search-div">
-                    <div class="env-type search-base-div search-left-div search-select-div">
-                        <div class="search-font-base-div" type="1">生产</div>
-                    </div>
-                    <div class="env-type search-base-div search-next-left-div" style="width: 70px;">
-                        <div class="search-font-base-div" style="width:50px" type="2">预发布</div>
-                    </div>
-                    <div class="env-type search-base-div search-right-div">
-                        <div class="search-font-base-div" type="3">测试</div>
-                    </div>
-                </div>
-            </div>
-    
-            <!-- app系统类型 -->
-            <div style="float: left; margin: 0 0 0 10px;">
-                <div class="search-div">
-                    <div class="sys-type search-base-div search-left-div search-select-div" style="width: 70px;">
-                        <div class="search-font-base-div" style="width: 50px" type="1">乾坤袋</div>
-                    </div>
-                    <div class="sys-type search-base-div search-next-left-div" style="width: 80px;">
-                        <div class="search-font-base-div" style="width: 60px" type="2">鸿坤金服</div>
-                    </div>
-                    <div class="sys-type search-base-div search-next-left-div" style="width: 70px;">
-                        <div class="search-font-base-div" style="width: 50px" type="3">财享+</div>
-                    </div>
-                    <div class="sys-type search-base-div search-right-div" style="width: 70px;">
-                        <div class="search-font-base-div" style="width: 50px" type="4">前生活</div>
-                    </div>
-                </div>
-            </div>
-            <br/>
+            <br>
             <div style="float: left; margin: 0 0 0 10px;">
                 <div>
                     <div style="float: left;">
-                        <input type="text" onchange="javascript:$('#search').val(this.value)" placeholder=" 名称/版本" style="width: 250px; height: 26px; border-radius: 10px 10px 10px 10px; padding: 1px 1px 1px 1px; border: 2px solid #a1a1a1;">
+                        <input type="text" onchange="javascript:$('#search').val(this.value)" placeholder=" 名称/版本" class="search-input-div">
                     </div>
                     <div style="float: left; margin: 6px 0 0 -30px;" id="searchImg">
                         <img src="img/search.ico" style="width: 20px;">
@@ -86,31 +60,7 @@
         
         <!-- 数据区 -->
         <div id="data">
-            <div class="data-no-div" id="noData">
-                <div>暂无记录</div>
-                <!--<div><img src="img/sad.ico" style="width: 20px;"></div>-->
-            </div>
-            <!--<div class="data-div" >
-                <div class="data-info-div">
-                    <div class="data-img-div">
-                        <img src="default.png">
-                    </div>
-                    <div class="data-detail-div">
-                        <div style="height:28px;">
-                            <img src="img/ios.ico" style="width: 40px;float: left;"><div class="data-label-span">鸿坤金服</div>
-                        </div><br/>
-                        <span class="data-detail-label-span">环境：</span><span class="data-detail-span">预发布</span><br/>
-                        <span class="data-detail-label-span">系统：</span><span class="data-detail-span">鸿坤金服</span><br/>
-                        <span class="data-detail-label-span">包名：</span><span class="data-detail-span">com.yiruntz.qiankundai</span><br/>
-                        <span class="data-detail-label-span">版本：</span><span class="data-detail-span">1.2.2(Build 1.0)</span><br/>
-                        <span class="data-detail-label-span">时间：</span><span class="data-detail-span">2018-01-18</span><br/>
-                    </div>
-                    <div>
-                        <div class="del data-del-div" code=""><img src="img/del.ico" style="width: 40px;"></div>
-                    </div>
-                </div>
-            </div>
-            <div style="height: 10px;"></div>-->
+            
         </div>
         <div id="noMore" class="data-no-more-div">
             <span>好尴尬，没有加载到更多...</span>
@@ -118,23 +68,16 @@
         <div class="data-more-div">
             <span id="loadMore">加载更多</span>
         </div>
-        <div style="margin-top: 15px; margin-left: 45%; float: left; color: #108ee9;">@copyright dobe</div>
+        <div style="margin-top: 15px; margin-left: 45%; float: left; color: #108ee9;">@copyright zcding</div>
     </div>
 </div>
 
-<a href="#" onclick="ShowDiv(1)"></a>
-<div id="ceng" style="position:absolute;z-index:2;left:0;top:0;right:0;background-color:#000;filter:alpha(opacity=50);margin:1px 1px;display:none;width:100%;height:100%;text-align:center;">
-</div>
-
-<div id="close" style="position:absolute !important;left:30%;top:0px;z-index:3;border:1px solid #ff6600;background-color:#fff;margin:100px auto;padding:0px;display:none;width:400px;height:300px;text-align:right">
-    <a href="#" onclick="ShowDiv(0)">关闭</a>
-    <div style="text-align:center;"></div>
-</div>
+<div id="tooltip" class="tooltip"></div>
 
 <form id="appInfoForm" method="post" action=""  enctype="multipart/form-data" >
-    <input type="hidden" name="appType" id="appType" value="1">
-    <input type="hidden" name="envType" id="envType" value="3">
-    <input type="hidden" name="sysType" id="sysType" value="1">
+    <input type="hidden" name="appType" id="appType" value="999">
+    <input type="hidden" name="envType" id="envType" value="999">
+    <input type="hidden" name="sysType" id="sysType" value="999">
     <input type="hidden" name="start" id="start" value="0">
     <input type="hidden" name="rows" id="rows" value="10">
     <input type="hidden" name="search" id="search" value="">

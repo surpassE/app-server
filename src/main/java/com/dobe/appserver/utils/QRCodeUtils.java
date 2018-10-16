@@ -143,6 +143,10 @@ public interface QRCodeUtils {
         String tmp = filePath + ".tmp";
         encode(contents, width, height, tmp);
         encodeWithLogo(tmp, logFilePath, filePath);
+        File file = new File(tmp);
+        if(file.exists()){
+            file.delete();
+        }
     }
 
     /**

@@ -7,6 +7,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 
 /**
@@ -80,6 +81,14 @@ public interface FileUtils {
     *  @author                  ：zc.ding@foxmail.com
     */
     static boolean saveFile(InputStream is, String filePath){
+        try {
+            File path = new File(filePath);
+            if(!path.getParentFile().exists()){
+                Files.createDirectories(Paths.get(path.getParent()));
+            }
+        }catch (Exception e){
+            
+        }
         //存储文件
         try(InputStream isTmp = is;
             OutputStream os = new FileOutputStream(filePath)){

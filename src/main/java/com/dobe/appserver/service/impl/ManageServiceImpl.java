@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -48,7 +47,7 @@ public class ManageServiceImpl implements ManageService {
                 return "文件已经存在";
             }
             
-            String code = SpecialCodeGenerateUtils.getSpecialNumCode();
+            String code = System.currentTimeMillis() + "";
             AppInfo appInfo = new AppInfo();
             String fileName = Optional.ofNullable(file.getOriginalFilename()).orElse("").toLowerCase();
             appInfo.setCode(code);
@@ -70,6 +69,7 @@ public class ManageServiceImpl implements ManageService {
                     //持久化安装包信息
                     if(this.repositoryService.saveAppInfo(appInfo) > 0){
                         //生成二维码图片
+                        this.creatQr(appInfo);
                         return Constants.SUCCESS;
                     }
                 }
@@ -89,7 +89,7 @@ public class ManageServiceImpl implements ManageService {
     public Integer delAppInfo(String code) {
         AppInfo appInfo = this.repositoryService.findAppInfoByCode(code);
         if(appInfo != null){
-            String basePath = appInfo.getAppType() == Constants.APP_TYPE_ANDROID ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS + File.separator + code;
+            String basePath = (appInfo.getAppType() == Constants.APP_TYPE_ANDROID ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + code;
             //删除安装包
             File file = new File(basePath + appInfo.getSuffix());
             if(file.exists()){
@@ -97,6 +97,11 @@ public class ManageServiceImpl implements ManageService {
             }
             //删除图标
             file = new File(basePath + Constants.APP_ICON_SUFFIX);
+            if(file.exists()){
+                file.delete();
+            }
+            //删除二维码图片
+            file = new File(basePath + Constants.APP_QR_CODE_SUFFIX);
             if(file.exists()){
                 file.delete();
             }
@@ -143,11 +148,12 @@ public class ManageServiceImpl implements ManageService {
         appInfo.setVersionName(apkMeta.getVersionName()); 
         appInfo.setPackageName(apkMeta.getPackageName());
         apkFile.getAllIcons().parallelStream().min(Comparator.comparingInt(o -> o.getData().length)).ifPresent(iconFace -> {
-            appInfo.setIcon(appInfo.getCode() + "_" + Paths.get(iconFace.getPath()).getFileName().toString());
-            String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getIcon();
+            appInfo.setIcon(Paths.get(iconFace.getPath()).getFileName().toString());
+            String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + Constants.APP_ICON_SUFFIX;
             FileUtils.saveFile(Paths.get(iconPath), iconFace.getData());
         });
         logger.info("{}", appInfo);
+        apkFile.close();
         return appInfo;
     }
     
@@ -181,8 +187,8 @@ public class ManageServiceImpl implements ManageService {
             Optional.ofNullable(iconNameReg).ifPresent(o -> {
                 List<Object> iconList = getIpaInputStream(filePath, o);
                 if(iconList != null){
-                    appInfo.setIcon(appInfo.getCode() + "_" + iconList.get(1));
-                    String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getIcon();
+                    appInfo.setIcon(iconList.get(1).toString());
+                    String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + Constants.APP_ICON_SUFFIX;
                     FileUtils.saveFile(Paths.get(iconPath), iconList.get(0));
                 }
             });
@@ -248,10 +254,17 @@ public class ManageServiceImpl implements ManageService {
         return "";
     }
     
+    /**
+    *  创建二维码
+    *  @param appInfo
+    *  @return void
+    *  @date                    ：2018/10/16
+    *  @author                  ：zc.ding@foxmail.com
+    */
     private void creatQr(AppInfo appInfo) throws Exception{
-        String logoFilePath = new File(ResourceUtils.getURL("classpath:").getPath()).getAbsolutePath() + "/static/img/app.jpg";
+        String logoFilePath = Constants.APP_PATH + "apps.jpg";
         String filePath = (appInfo.getFileName().endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + appInfo.getCode() + ".jpg";
-        QRCodeUtils.encode("http://baidu.com", 256, 256, Constants.APP_PATH + File.separator + filePath, logoFilePath);
+        QRCodeUtils.encode("http://baidu.com", 256, 256, filePath, logoFilePath);
 
     }
 }

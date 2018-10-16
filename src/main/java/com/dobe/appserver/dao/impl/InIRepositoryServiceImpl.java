@@ -82,10 +82,29 @@ public class InIRepositoryServiceImpl implements RepositoryService {
         try {
             lock.writeLock().lock();
             List<AppInfo> list = iniTool.loadSec(AppInfo.class, DB_PATH);
-//            lock.writeLock().unlock();
             if (list != null) {
                 List<AppInfo> result =
-                        list.stream().filter(o -> appInfo.getAppType().equals(o.getAppType()) && appInfo.getSysType().equals(o.getSysType()) && appInfo.getSysType().equals(o.getSysType())).filter(a -> {
+                        list.stream().filter(o -> {
+                            if(appInfo.getAppType() != null && appInfo.getAppType() != Constants.ALL){
+                                return appInfo.getAppType().equals(o.getAppType());
+                            }
+                            return true;
+                        }).filter(o -> {
+                            if(appInfo.getEnvType() != null && appInfo.getEnvType() != Constants.ALL){
+                                return appInfo.getEnvType().equals(o.getEnvType());
+                            }
+                            return true;
+                        }).filter(o -> {
+                            if(appInfo.getSysType() != null && appInfo.getSysType() != Constants.ALL){
+                                return appInfo.getSysType().equals(o.getSysType());
+                            }
+                            return true;
+                        }).filter(o -> {
+                            if(appInfo.getAppType() != null && appInfo.getAppType() != Constants.ALL){
+                                return appInfo.getAppType().equals(o.getAppType());
+                            }
+                            return true;
+                        }).filter(a -> {
                             if (!StringUtils.isEmpty(appInfo.getSearch())) {
                                 return a.getLabel().toUpperCase().contains(appInfo.getLabel().toUpperCase().trim());
                             }

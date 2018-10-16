@@ -45,12 +45,10 @@ public class AppInfo implements Serializable {
     /**
      * 1-qkd 2-hkjf 3-cxj 4-qsh
      */
-    @Option
     private Integer sysType;
     /**
      * 1-dev(snapshoot) 2-beta 3-stable(released)
      */
-    @Option
     private Integer envType;
     @Option
     private String fileName;

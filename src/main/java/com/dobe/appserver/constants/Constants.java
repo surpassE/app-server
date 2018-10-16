@@ -1,5 +1,10 @@
 package com.dobe.appserver.constants;
 
+import org.springframework.util.ResourceUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
 /**
  * 常量
  *
@@ -17,9 +22,23 @@ public class Constants {
     */
     public final static String ERROR = "ERROR";
     /**
+    * 查询所有
+    */
+    public final static int ALL = 999;
+    
+    /**
      * D:/test/app  C:/soft/test/app
      */
-    public static String APP_PATH = "D:/test/app";
+    public static String APP_PATH;
+
+    static{
+        try {
+            APP_PATH = new File(ResourceUtils.getURL("classpath:").getPath()).getAbsolutePath() + File.separator + "static/apps" + File.separator;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     /**
     * 数据存储位置
     */
@@ -29,6 +48,11 @@ public class Constants {
     * 图标后缀
     */
     public final static String APP_ICON_SUFFIX = ".png";
+
+    /**
+     * 二维码图片后缀
+     */
+    public final static String APP_QR_CODE_SUFFIX = ".jpg";
 
     /**
     * android后缀
@@ -87,5 +111,4 @@ public class Constants {
     * app类型 前生活
     */
     public final static int APP_SYS_TYPE_QSH = 4;
-    
 }
