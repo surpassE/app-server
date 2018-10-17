@@ -1,5 +1,6 @@
 package com.dobe.appserver.dao.impl;
 
+import com.dobe.appserver.constants.Config;
 import com.dobe.appserver.constants.Constants;
 import com.dobe.appserver.dao.RepositoryService;
 import com.dobe.appserver.model.AppInfo;
@@ -7,6 +8,8 @@ import com.sirding.singleton.IniTool;
 import org.apache.tomcat.util.bcel.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -28,26 +31,14 @@ import java.util.stream.Collectors;
  * @create 2018/10/12
  */
 @Repository("inIRepositoryServiceImpl")
-public class InIRepositoryServiceImpl implements RepositoryService {
-    
+public class InIRepositoryServiceImpl implements RepositoryService, InitializingBean {
+    @Autowired
+    private Config config;
     private static Logger logger = LoggerFactory.getLogger(InIRepositoryServiceImpl.class);
     private static IniTool iniTool = IniTool.newInstance();
-    private final static String DB_PATH = Constants.APP_PATH + File.separator + Constants.APP_DB_PATH;
-
+    private String DB_PATH;
     private ReadWriteLock lock = new ReentrantReadWriteLock();
     
-    //创建配置保存路径
-    static{
-        File file = new File(DB_PATH);
-        if(!file.exists()){
-            try {
-                Files.createDirectories(Paths.get(DB_PATH).getParent());
-                logger.info("create db.ini config file. status : {}", file.createNewFile());
-            }catch (Exception e){
-                logger.error("create db.ini config fail.", e);
-            }
-        }
-    }
     
     @Override
     public Integer saveAppInfo(AppInfo appInfo) {
@@ -151,5 +142,19 @@ public class InIRepositoryServiceImpl implements RepositoryService {
             lock.readLock().unlock();
         }
         return null;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        DB_PATH = config.getBasePath() + File.separator + Constants.APP_DB_PATH;
+        File file = new File(DB_PATH);
+        if(!file.exists()){
+            try {
+                Files.createDirectories(Paths.get(DB_PATH).getParent());
+                logger.info("create db.ini config file. status : {}", file.createNewFile());
+            }catch (Exception e){
+                logger.error("create db.ini config fail.", e);
+            }
+        }
     }
 }

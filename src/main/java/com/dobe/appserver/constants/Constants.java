@@ -1,10 +1,5 @@
 package com.dobe.appserver.constants;
 
-import org.springframework.util.ResourceUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-
 /**
  * 常量
  *
@@ -12,8 +7,7 @@ import java.io.FileNotFoundException;
  * @create 2018/10/11
  */
 public class Constants {
-    
-    /**
+        /**
     * 成功
     */
     public final static String SUCCESS = "SUCCESS";
@@ -29,15 +23,7 @@ public class Constants {
     /**
      * D:/test/app  C:/soft/test/app
      */
-    public static String APP_PATH;
-
-    static{
-        try {
-            APP_PATH = new File(ResourceUtils.getURL("classpath:").getPath()).getAbsolutePath() + File.separator + "static/apps" + File.separator;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    public static String APP_PATH = "D:/test/app";
     
     /**
     * 数据存储位置
@@ -69,11 +55,11 @@ public class Constants {
     /**
     * android app存储路径
     */
-    public final static String APP_PATH_ANDROID = APP_PATH + "/android/";
+    public final static String APP_PATH_ANDROID = "/android/";
     /**
     * iso存储路径
     */
-    public final static String APP_PATH_IOS = APP_PATH + "/ios/";
+    public final static String APP_PATH_IOS = "/ios/";
     /**
     * app安装包类型 ios
     */

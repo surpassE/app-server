@@ -1,14 +1,12 @@
 package com.dobe.appserver.service.impl;
 
 import com.dd.plist.*;
+import com.dobe.appserver.constants.Config;
 import com.dobe.appserver.constants.Constants;
 import com.dobe.appserver.dao.RepositoryService;
 import com.dobe.appserver.model.AppInfo;
 import com.dobe.appserver.service.ManageService;
-import com.dobe.appserver.utils.DateUtils;
-import com.dobe.appserver.utils.FileUtils;
-import com.dobe.appserver.utils.QRCodeUtils;
-import com.dobe.appserver.utils.SpecialCodeGenerateUtils;
+import com.dobe.appserver.utils.*;
 import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
 import org.slf4j.Logger;
@@ -34,6 +32,8 @@ import java.util.zip.ZipInputStream;
 public class ManageServiceImpl implements ManageService {
     private static final Logger logger = LoggerFactory.getLogger(ManageServiceImpl.class);
     
+    @Autowired
+    private Config config;
     
     @Autowired
     @Qualifier("inIRepositoryServiceImpl")
@@ -60,7 +60,7 @@ public class ManageServiceImpl implements ManageService {
             appInfo.setSuffix(fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_SUFFIX_ANDROID : Constants.APP_SUFFIX_IOS);
             appInfo.setTime(DateUtils.format());
             //本地存储路径
-            String filePath = (fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + code + appInfo.getSuffix();
+            String filePath = (fileName.endsWith(Constants.APP_SUFFIX_ANDROID) ? getAndroidPath() : getIosPath()) + File.separator + code + appInfo.getSuffix();
             logger.info("save file path: {}", filePath);
             if(FileUtils.saveFile(file.getInputStream(), filePath)){
                 //解析app安装包
@@ -89,7 +89,7 @@ public class ManageServiceImpl implements ManageService {
     public Integer delAppInfo(String code) {
         AppInfo appInfo = this.repositoryService.findAppInfoByCode(code);
         if(appInfo != null){
-            String basePath = (appInfo.getAppType() == Constants.APP_TYPE_ANDROID ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + code;
+            String basePath = (appInfo.getAppType() == Constants.APP_TYPE_ANDROID ? getAndroidPath() : getIosPath()) + File.separator + code;
             //删除安装包
             File file = new File(basePath + appInfo.getSuffix());
             if(file.exists()){
@@ -190,6 +190,8 @@ public class ManageServiceImpl implements ManageService {
                     appInfo.setIcon(iconList.get(1).toString());
                     String iconPath = Paths.get(filePath).getParent().toString() + File.separator + appInfo.getCode() + Constants.APP_ICON_SUFFIX;
                     FileUtils.saveFile(Paths.get(iconPath), iconList.get(0));
+                    //对ios的图片进行解压缩
+                    this.uncompress(appInfo);
                 }
             });
         }
@@ -262,9 +264,40 @@ public class ManageServiceImpl implements ManageService {
     *  @author                  ：zc.ding@foxmail.com
     */
     private void creatQr(AppInfo appInfo) throws Exception{
-        String logoFilePath = Constants.APP_PATH + "apps.jpg";
-        String filePath = (appInfo.getFileName().endsWith(Constants.APP_SUFFIX_ANDROID) ? Constants.APP_PATH_ANDROID : Constants.APP_PATH_IOS) + File.separator + appInfo.getCode() + ".jpg";
-        QRCodeUtils.encode("http://baidu.com", 256, 256, filePath, logoFilePath);
-
+        String logoFilePath = config.getBasePath() + "apps.jpg";
+        String filePath = (appInfo.getFileName().endsWith(Constants.APP_SUFFIX_ANDROID) ? getAndroidPath() : getIosPath()) + File.separator + appInfo.getCode() + ".jpg";
+        String url = UrlUtils.getIpPort();
+        url = url + "apps/" + (appInfo.getSuffix().equals(Constants.APP_SUFFIX_IOS) ? "ios" : "android");
+        url = url + "/" + appInfo.getCode() + appInfo.getSuffix();
+        url = url.replaceAll("/static", "");
+        logger.info("下载地址:{}", url);
+        QRCodeUtils.encode(url, 256, 256, filePath, logoFilePath);
+    }
+    
+    private void uncompress(AppInfo appInfo) {
+        File pngFile = new File(getBasePath(appInfo) + Constants.APP_ICON_SUFFIX);
+        try {
+            if(System.getProperty("os.name").toLowerCase().contains("linux")){
+                ProcessBuilder mBuilder = new ProcessBuilder();
+                mBuilder.redirectErrorStream(true);
+                ProcessBuilder processBuilder = mBuilder.command(config.getBasePath() + "pngdefry", "-o", pngFile.getParent(), pngFile.getAbsolutePath());
+                Process process = processBuilder.start();
+            }
+        }catch (Exception e){
+            logger.error("uncompress ipa icon fail.", e);
+        }
+        
+    }
+    
+    private String getBasePath(AppInfo appInfo){
+        return (appInfo.getFileName().endsWith(Constants.APP_SUFFIX_ANDROID) ? getAndroidPath() : getIosPath()) + File.separator + appInfo.getCode();
+    }
+    
+    private String getAndroidPath(){
+        return config.getBasePath() + Constants.APP_PATH_ANDROID;
+    }
+    
+    private String getIosPath(){
+        return config.getBasePath() + Constants.APP_PATH_IOS;
     }
 }

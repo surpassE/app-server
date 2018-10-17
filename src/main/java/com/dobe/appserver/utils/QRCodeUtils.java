@@ -1,7 +1,6 @@
 package com.dobe.appserver.utils;
 
 
-import com.dobe.appserver.constants.Constants;
 import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
@@ -174,16 +173,6 @@ public interface QRCodeUtils {
             e.printStackTrace();
         }
         return result.getText() ;
-    }
-
-    public static void main(String[] args) {
-        String url = "http://baidu.com";
-        String qrFilePath = Constants.APP_PATH + File.separator + "test.jpg";
-        String logoFilePath = Constants.APP_PATH + File.separator + "apps.jpg";
-        String newQrFilePath = Constants.APP_PATH + File.separator + "logo.jpg";
-        encode(url, 256, 256, qrFilePath);
-        encodeWithLogo(qrFilePath, logoFilePath, newQrFilePath);
-        
     }
 }
 

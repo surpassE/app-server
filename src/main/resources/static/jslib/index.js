@@ -92,16 +92,13 @@ function renderData(data){
         //绑定二维码显示事件
         $(".qrCode").each(function(){
             var src = $(this).attr("src");
-            console.info(src);
             var tooltip = $("#tooltip");
-            $(this).mouseover(function(e){
+            $(this).unbind().mouseover(function(e){
                 var position = mousePosition(e);
-                console.info(position);
-                
                 var xOffset = 350;
                 var yOffset = 21;
                 tooltip.css("display","block").css("position","absolute").css("top",(position.y - yOffset) + "px").css("left",(position.x - xOffset) + "px");
-                tooltip.append("<img src='" + src + "' style='width:220px;'>");
+                tooltip.append("<img src='" + src + "' style='width:220px;' onerror='this.src=\"img/default.png\"'>");
             });
             $(this).mouseout(function(e){
                 tooltip.empty();
