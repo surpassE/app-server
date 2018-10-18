@@ -53,9 +53,10 @@ function renderData(data){
         if(o.appType == "2"){
             appType="android";
         }
-        msg = "<div id=\"" + o.code + "\"class=\"data-div\" ><div class=\"data-info-div\">\n" +
+        msg = "<div id=\"" + o.code + "\" class=\"data-div\" ><div class=\"data-info-div\">\n" +
             "            <div class=\"data-img-div\">\n" +
-            "                <img src=\"apps/" + appType + "/" + o.code + ".png\">\n" +
+            // "                <img src=\"apps/" + appType + "/" + o.code + ".png\">\n" +
+            "                <img src=\"manage/download?code=" + o.code + "&appType=" + appType + "&suffix=.png\">\n" +
             "            </div>\n" +
             "            <div class=\"data-detail-div\">\n" +
             "                <div style=\"height:28px;\">\n" +
@@ -69,7 +70,7 @@ function renderData(data){
             "                <div class=\"del data-del-div\" code=\"" + o.code + "\"><img src=\"img/del.ico\" style=\"width: 20px;\"></div>\n" +
             "            </div>\n" +
             "            <div>\n" +
-            "                <div class=\"data-del-div\"><img src=\"apps/" + appType + "/" + o.code + ".jpg\" class='qrCode' style=\"width: 27px;margin: -3px 0 0 0;\"></div>\n" +
+            "                <div class=\"data-del-div\"><img src=\"manage/download?code=" + o.code + "&appType=" + appType + "&suffix=.jpg\" class='qrCode' style=\"width: 27px;margin: -3px 0 0 0;\"></div>\n" +
             "            </div>\n" +
             "        </div></div><div style=\"height: 10px;\"></div>";
         $("#data").append(msg);

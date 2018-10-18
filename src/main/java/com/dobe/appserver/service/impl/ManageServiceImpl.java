@@ -263,15 +263,13 @@ public class ManageServiceImpl implements ManageService {
     *  @date                    ：2018/10/16
     *  @author                  ：zc.ding@foxmail.com
     */
-    private void creatQr(AppInfo appInfo) throws Exception{
-        String logoFilePath = config.getBasePath() + "apps.jpg";
+    private void creatQr(AppInfo appInfo){
+//        String logoFilePath = config.getBasePath() + "apps.jpg";
         String filePath = (appInfo.getFileName().endsWith(Constants.APP_SUFFIX_ANDROID) ? getAndroidPath() : getIosPath()) + File.separator + appInfo.getCode() + ".jpg";
         String url = UrlUtils.getIpPort();
-        url = url + "apps/" + (appInfo.getSuffix().equals(Constants.APP_SUFFIX_IOS) ? "ios" : "android");
-        url = url + "/" + appInfo.getCode() + appInfo.getSuffix();
-        url = url.replaceAll("/static", "");
+        url = url + "manage/download?code=" + appInfo.getCode() + "&appType=" + (appInfo.getSuffix().equals(Constants.APP_SUFFIX_IOS) ? "ios" : "android") + "&suffix=" + appInfo.getSuffix();
         logger.info("下载地址:{}", url);
-        QRCodeUtils.encode(url, 256, 256, filePath, logoFilePath);
+        QRCodeUtils.encode(url, 256, 256, filePath);
     }
     
     private void uncompress(AppInfo appInfo) {

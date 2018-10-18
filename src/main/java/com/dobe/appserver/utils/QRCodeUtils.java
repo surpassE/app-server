@@ -7,9 +7,8 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import org.springframework.stereotype.Service;
+
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -111,9 +110,11 @@ public interface QRCodeUtils {
 
             bufferImage.flush() ;
             os = new FileOutputStream(newQrFile) ;
-            JPEGImageEncoder en = JPEGCodec.createJPEGEncoder(os) ;
-            en.encode(bufferImage) ;
+//            JPEGImageEncoder en = JPEGCodec.createJPEGEncoder(os) ;
+//            en.encode(bufferImage) ;
+            ImageIO.write(bufferImage, "jpg", os);
 
+            os.close();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -133,15 +134,15 @@ public interface QRCodeUtils {
     *  @param width
     *  @param height
     *  @param filePath
-    *  @param logFilePath
+    *  @param logoFilePath
     *  @return void
     *  @date                    ：2018/10/15
     *  @author                  ：zc.ding@foxmail.com
     */
-    static void encode(String contents, int width, int height, String filePath, String logFilePath){
+    static void encode(String contents, int width, int height, String filePath, String logoFilePath){
         String tmp = filePath + ".tmp";
         encode(contents, width, height, tmp);
-        encodeWithLogo(tmp, logFilePath, filePath);
+        encodeWithLogo(tmp, logoFilePath, filePath);
         File file = new File(tmp);
         if(file.exists()){
             file.delete();
@@ -173,6 +174,10 @@ public interface QRCodeUtils {
             e.printStackTrace();
         }
         return result.getText() ;
+    }
+
+    public static void main(String[] args) {
+        encode("http://www.baidu.com", 100, 100, "D:/test/qr.jpg", "D:/test/logo.jpg");
     }
 }
 

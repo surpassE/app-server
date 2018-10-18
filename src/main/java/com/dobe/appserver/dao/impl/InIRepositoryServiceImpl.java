@@ -97,7 +97,7 @@ public class InIRepositoryServiceImpl implements RepositoryService, Initializing
                             return true;
                         }).filter(a -> {
                             if (!StringUtils.isEmpty(appInfo.getSearch())) {
-                                return a.getLabel().toUpperCase().contains(appInfo.getLabel().toUpperCase().trim());
+                                return a.getLabel().contains(appInfo.getSearch().toUpperCase().trim());
                             }
                             return true;
                         }).sorted(Comparator.comparing(AppInfo::getTime)).collect(Collectors.toList());
