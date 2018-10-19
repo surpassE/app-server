@@ -430,3 +430,16 @@
 [DEBUG][2018-10-18 13:40:28,432][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
 [DEBUG][2018-10-18 13:41:24,913][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
 [DEBUG][2018-10-18 13:42:19,723][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:02:59,206][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:23:02,098][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:27:43,850][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:27:43,918][com.sirding.service.impl.SecServiceImpl]将【1539834144493】从【D:/test/apps\db.ini】配置文件中删除...
+[DEBUG][2018-10-19 10:27:45,079][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:27:45,097][com.sirding.service.impl.SecServiceImpl]将【1539841065069】从【D:/test/apps\db.ini】配置文件中删除...
+[DEBUG][2018-10-19 10:27:49,935][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:27:50,215][com.sirding.service.impl.SecServiceImpl]配置信息将保存到【D:/test/apps\db.ini】文件中
+[DEBUG][2018-10-19 10:27:50,216][com.sirding.service.impl.SecServiceImpl]配置信息已成功保存到文件中......
+[DEBUG][2018-10-19 10:27:50,365][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:32:33,746][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:32:43,030][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
+[DEBUG][2018-10-19 10:34:52,688][com.sirding.service.impl.SecServiceImpl]从【D:/test/apps\db.ini】文件中加载配置信息
